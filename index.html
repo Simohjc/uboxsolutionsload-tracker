@@ -274,7 +274,19 @@
         Print / Save PDF
     </button>
 
-</div>
+    </div>
+    
+    <div class="summary" style="margin-top:20px;">
+
+    <h2>Saved Weekly PDFs</h2>
+
+    <div id="pdfArchive"></div>
+    <button class="export-btn" onclick="saveWeeklyPDF()">
+    Save Weekly PDF
+    </button>
+
+    </div>
+    
 
 </div>
 
@@ -285,7 +297,9 @@ const DETENTION_RATE = 15;
 
 let loads = JSON.parse(localStorage.getItem("loads")) || [];
 
+checkWeeklyReset();
 renderTable();
+renderArchive();
 
 function addLoad(){
 
@@ -344,13 +358,24 @@ function addLoad(){
         total
     };
 
-    loads.push(load);
+    if(
+    !loadNumber ||
+    !pickup ||
+    !delivery ||
+    !pickupDate ||
+    !deliveryDate
+){
+    alert("Please fill all required fields.");
+    return;
+}
 
-    localStorage.setItem("loads", JSON.stringify(loads));
+loads.push(load);
 
-    clearInputs();
+localStorage.setItem("loads", JSON.stringify(loads));
 
-    renderTable();
+clearInputs();
+
+renderTable();
 }
 
 function renderTable(){
@@ -423,6 +448,110 @@ function clearInputs(){
 
     document.getElementById("detentionHours").value = "";
 }
+
+
+function checkWeeklyReset(){
+
+    const lastReset = localStorage.getItem("lastResetDate");
+
+    const today = new Date();
+
+    const todayString = today.toISOString().split("T")[0];
+
+    const day = today.getDay();
+
+    // Tuesday = 2
+    if(day === 2 && lastReset !== todayString){
+
+        // Clear loads
+        loads = [];
+
+        localStorage.removeItem("loads");
+
+        // Clear week dates
+        localStorage.removeItem("weekStart");
+        localStorage.removeItem("weekEnd");
+
+        // Clear week input fields
+        document.getElementById("weekStart").value = "";
+        document.getElementById("weekEnd").value = "";
+
+        // Reset summary
+        document.getElementById("totalMiles").innerText = 0;
+        document.getElementById("totalDetentionHours").innerText = 0;
+
+        // Clear all inputs
+        clearInputs();
+
+        // Re-render table
+        renderTable();
+
+        // Save reset date
+        localStorage.setItem("lastResetDate", todayString);
+    }
+}
+
+function saveWeeklyPDF(){
+
+    const weekStartValue = document.getElementById("weekStart").value;
+
+    const weekEndValue = document.getElementById("weekEnd").value;
+
+    if(!weekStartValue || !weekEndValue){
+        alert("Please select week start and end dates.");
+        return;
+    }
+
+    const archive = JSON.parse(localStorage.getItem("pdfArchive")) || [];
+
+    const pdfName = `Week ${weekStartValue} to ${weekEndValue}`;
+
+    archive.push({
+        name: pdfName,
+        date: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("pdfArchive", JSON.stringify(archive));
+
+    renderArchive();
+
+    window.print();
+}
+
+function renderArchive(){
+
+    const archiveContainer = document.getElementById("pdfArchive");
+
+    const archive = JSON.parse(localStorage.getItem("pdfArchive")) || [];
+
+    archiveContainer.innerHTML = "";
+
+    if(archive.length === 0){
+        archiveContainer.innerHTML = "<p>No saved weekly PDFs yet.</p>";
+        return;
+    }
+
+    archive.forEach((item,index)=>{
+
+        archiveContainer.innerHTML += `
+        <div style="
+            background:white;
+            padding:10px;
+            margin-top:10px;
+            border-radius:8px;
+            border:1px solid #ddd;
+        ">
+            <strong>${item.name}</strong><br>
+            Saved: ${item.date}
+        </div>
+        `;
+    });
+}
+
+
+
+
+
 
 const weekStart = document.getElementById("weekStart");
 const weekEnd = document.getElementById("weekEnd");
