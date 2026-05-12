@@ -93,6 +93,9 @@
         border-collapse:collapse;
         margin-top:20px;
     }
+   .table-wrapper{
+    overflow-x:auto;
+    }
     th, td{
         border:1px solid #ddd;
         padding:10px;
@@ -185,6 +188,7 @@
     <input type="number" id="detentionHours" placeholder="Detention Hours">
     <button onclick="addLoad()">Add Load</button>
 </div>
+   <div class="table-wrapper">
     <table>
         <thead>
     <tr>
@@ -203,6 +207,7 @@
 </thead>
         <tbody id="tableBody"></tbody>
     </table>
+   </div>
     <div class="summary">
     <h2>Weekly Summary</h2>
     <p>
