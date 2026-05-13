@@ -247,6 +247,7 @@
         <th>Delivery Time</th>
         <th>Miles</th>
         <th>Detention</th>
+        <th>Edit</th>
         <th>Delete</th>
     </tr>
 </thead>
@@ -296,6 +297,7 @@ const RATE_PER_MILE = 0.75;
 const DETENTION_RATE = 15;
 
 let loads = JSON.parse(localStorage.getItem("loads")) || [];
+let editIndex = -1;
 
 checkWeeklyReset();
 renderTable();
@@ -369,7 +371,12 @@ function addLoad(){
     return;
 }
 
-loads.push(load);
+if(editIndex === -1){
+    loads.push(load);
+}else{
+    loads[editIndex] = load;
+    editIndex = -1;
+}
 
 localStorage.setItem("loads", JSON.stringify(loads));
 
@@ -405,10 +412,16 @@ function renderTable(){
     <td>${load.miles}</td>
     <td>${load.detentionHours} hr</td>
     <td>
-        <button class="delete-btn" onclick="deleteLoad(${index})">
-            Delete
-        </button>
-    </td>
+    <button onclick="editLoad(${index})">
+        Edit
+    </button>
+</td>
+
+<td>
+    <button class="delete-btn" onclick="deleteLoad(${index})">
+        Delete
+    </button>
+</td>
 </tr>
 `;
     });
@@ -425,6 +438,34 @@ function deleteLoad(index){
 
     renderTable();
 }
+
+function editLoad(index){
+
+    const load = loads[index];
+
+    document.getElementById("loadNumber").value = load.loadNumber;
+
+    document.getElementById("refordry").value = load.refordry;
+
+    document.getElementById("pickup").value = load.pickup;
+
+    document.getElementById("pickupDate").value = load.pickupDate;
+
+    document.getElementById("pickupTime").value = load.pickupTime;
+
+    document.getElementById("delivery").value = load.delivery;
+
+    document.getElementById("deliveryDate").value = load.deliveryDate;
+
+    document.getElementById("deliveryTime").value = load.deliveryTime;
+
+    document.getElementById("miles").value = load.miles;
+
+    document.getElementById("detentionHours").value = load.detentionHours;
+
+    editIndex = index;
+}
+   
 
 function clearInputs(){
 
