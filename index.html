@@ -2,625 +2,730 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Ubox Solutions Load Tracker</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2563eb">
 <link rel="apple-touch-icon" href="icon-192.png">
-
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family:Arial, sans-serif;
-    }
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body { background:#f4f6f9; padding:10px; -webkit-text-size-adjust:100%; }
 
-   body{
-    background:#f4f6f9;
-    padding:10px;
-    overflow-x:auto;
+.container { max-width:1300px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,.1); }
+h1 { text-align:center; margin-bottom:6px; color:#1e3a8a; font-size:clamp(18px,4vw,26px); }
+h3 { text-align:center; margin-bottom:20px; color:#1e3a8a; font-size:clamp(14px,3vw,18px); }
+
+/* IDENTITY */
+.section-label { font-size:11px; font-weight:bold; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.identity-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.identity-box { background:#f0fdf4; padding:10px; border-radius:10px; border:2px solid #bbf7d0; }
+.identity-box label { display:block; margin-bottom:4px; font-weight:bold; color:#166534; font-size:12px; }
+.identity-box input { font-size:14px; padding:8px 10px; }
+
+/* WEEK */
+.week-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px; }
+.week-box { background:#eef2ff; padding:10px; border-radius:10px; border:2px solid #c7d2fe; }
+.week-box label { display:block; margin-bottom:4px; font-weight:bold; color:#1e3a8a; font-size:12px; }
+.week-box input { font-size:14px; padding:8px 10px; }
+
+/* INPUTS */
+input[type="text"],input[type="number"],input[type="date"],input[type="time"] {
+  width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px; font-size:15px;
+  -webkit-appearance:none; appearance:none;
+}
+input:focus { outline:2px solid #2563eb; border-color:#2563eb; }
+
+/* FORM */
+.form-section { margin-bottom:20px; }
+.form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.form-group { min-width:0; }
+.form-group label { display:block; margin-bottom:4px; font-size:13px; color:#1e3a8a; font-weight:bold; }
+@media(min-width:600px){
+  .form-grid { grid-template-columns:repeat(3,1fr); gap:12px; }
+}
+@media(min-width:900px){
+  .form-grid { grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
 }
 
-    .container{
-        max-width:1200px;
-        margin:auto;
-        background:white;
-        padding:20px;
-        border-radius:12px;
-        box-shadow:0 0 10px rgba(0,0,0,0.1);
-    }
+/* BUTTONS */
+.btn { padding:11px 18px; border:none; border-radius:8px; background:#2563eb; color:white; cursor:pointer; font-size:15px; transition:.2s; touch-action:manipulation; }
+.btn:hover  { background:#1d4ed8; }
+.btn-cancel { background:#6b7280; } .btn-cancel:hover { background:#4b5563; }
+.btn-red    { background:#dc2626; } .btn-red:hover    { background:#b91c1c; }
+.btn-amber  { background:#d97706; } .btn-amber:hover  { background:#b45309; }
+.btn-green  { background:#059669; } .btn-green:hover  { background:#047857; }
+.btn-sm { padding:7px 12px; font-size:13px; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
 
-    h1{
-        text-align:center;
-        margin-bottom:20px;
-        color:#1e3a8a;
-    }
-    h3{
-      text-align: center;
-      margin-bottom: 30px;
-      color:#1e3a8a;
-    }
-    
-    .week-section{
-    display:flex;
-    gap:20px;
-    justify-content:center;
-    align-items:center;
-    margin-bottom:25px;
-    flex-wrap:wrap;
+/* EDIT BANNER */
+.edit-banner {
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  background:#fef3c7; border:1px solid #f59e0b; border-radius:8px;
+  padding:10px 14px; margin-bottom:12px; color:#92400e; font-weight:bold; font-size:14px;
 }
 
-.week-box{
-    background:#eef2ff;
-    padding:15px;
-    border-radius:10px;
-    min-width:220px;
+/* TABLE */
+.scroll-hint { display:none; text-align:center; font-size:12px; color:#9ca3af; padding:4px 0 8px; }
+.table-wrapper { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:20px; border-radius:8px; }
+table { width:100%; min-width:900px; border-collapse:collapse; }
+th,td { border:1px solid #ddd; padding:9px 8px; text-align:center; white-space:nowrap; font-size:13px; }
+th { background:#2563eb; color:white; }
+tr:nth-child(even) { background:#f8fafc; }
+.pay-green { color:#059669; font-weight:bold; }
+.pay-amber { color:#d97706; font-weight:bold; }
+.pay-blue  { color:#1e3a8a; font-weight:bold; }
+
+/* SUMMARY */
+.summary { margin-top:24px; background:#eef2ff; padding:18px; border-radius:10px; }
+.summary h2 { margin-bottom:12px; color:#1e3a8a; font-size:clamp(15px,3vw,20px); }
+.summary-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+.s-card { background:white; padding:12px 14px; border-radius:8px; border:1px solid #c7d2fe; }
+.s-card .lbl { font-size:11px; color:#6b7280; margin-bottom:4px; }
+.s-card .val { font-size:17px; font-weight:bold; color:#1e3a8a; }
+.s-card .val.green { color:#059669; }
+@media(min-width:600px){
+  .summary-grid { grid-template-columns:repeat(3,1fr); }
+}
+@media(min-width:900px){
+  .summary-grid { grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+  .s-card .val { font-size:19px; }
 }
 
-.week-box label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:bold;
-    color:#1e3a8a;
+/* ARCHIVE */
+.archive { margin-top:20px; background:#eef2ff; padding:18px; border-radius:10px; }
+.archive h2 { margin-bottom:12px; color:#1e3a8a; font-size:clamp(15px,3vw,20px); }
+.arc-item { background:white; padding:12px 14px; margin-top:10px; border-radius:8px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+.arc-info strong { display:block; color:#1e3a8a; font-size:14px; }
+.arc-info span { font-size:12px; color:#6b7280; }
+.arc-actions { display:flex; gap:8px; flex-shrink:0; }
+
+/* ── CARD VIEW (mobile / iPad) ── */
+.card-view { display:none; margin-top:16px; }
+.load-card {
+  background:white; border:1px solid #e5e7eb; border-radius:12px;
+  padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.card-head {
+  display:flex; align-items:center; gap:10px;
+  padding-bottom:10px; margin-bottom:10px; border-bottom:2px solid #eef2ff;
+}
+.card-num {
+  width:28px; height:28px; border-radius:50%; background:#2563eb; color:white;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:bold; flex-shrink:0;
+}
+.card-load-num { font-size:15px; font-weight:bold; color:#1e3a8a; flex:1; }
+.card-badge {
+  background:#eef2ff; color:#2563eb; border-radius:6px;
+  padding:3px 10px; font-size:12px; font-weight:bold;
+}
+.card-legs {
+  display:grid; grid-template-columns:1fr auto 1fr;
+  gap:8px; align-items:start; margin-bottom:10px;
+}
+.card-leg-lbl {
+  font-size:10px; color:#9ca3af; text-transform:uppercase;
+  font-weight:bold; letter-spacing:.05em; margin-bottom:2px;
+}
+.card-leg-city { font-size:14px; font-weight:bold; color:#111827; white-space:normal; word-break:break-word; }
+.card-leg-dt { font-size:12px; color:#6b7280; margin-top:2px; }
+.card-arrow { color:#9ca3af; font-size:20px; text-align:center; padding-top:14px; }
+.card-stats {
+  display:flex; gap:20px; padding:8px 0;
+  border-top:1px solid #f3f4f6; border-bottom:1px solid #f3f4f6;
+  margin-bottom:10px;
+}
+.card-stat-lbl { font-size:10px; color:#9ca3af; text-transform:uppercase; font-weight:bold; }
+.card-stat-val { font-size:15px; font-weight:bold; color:#1e3a8a; }
+.card-pay {
+  display:flex; gap:12px; flex-wrap:wrap;
+  font-size:13px; font-weight:bold; margin-bottom:10px;
+}
+.card-actions { display:flex; gap:8px; justify-content:flex-end; }
+.card-empty {
+  text-align:center; color:#9ca3af; padding:24px;
+  background:#f9fafb; border-radius:10px; font-size:14px;
+}
+/* Show cards, hide table on mobile + iPad */
+@media(max-width:899px){
+  .table-view { display:none !important; }
+  .card-view  { display:block; }
 }
 
-    .form-grid{
-        display:grid;
-        grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-        gap:15px;
-        margin-bottom:20px;
-    }
-    label{
-    display:block;
-    margin-bottom:5px;
-    font-size:14px;
-    color:#1e3a8a;
-    font-weight:bold;
+/* PRINT META */
+.print-meta { display:none; }
+
+/* ── PHONE (≤479px) ── */
+@media(max-width:479px){
+  body { padding:6px; }
+  .container { padding:12px 10px; border-radius:8px; }
+  .scroll-hint { display:block; }
+  th,td { font-size:11px; padding:6px 4px; }
+  .btn { font-size:13px; padding:10px 12px; }
+  .btn-row { flex-direction:column; }
+  .btn-row .btn { width:100%; text-align:center; }
+  .arc-item { flex-direction:column; align-items:flex-start; }
+  .arc-actions { width:100%; justify-content:flex-end; }
+}
+/* ── TABLET / iPAD (600px–899px) ── */
+@media(min-width:600px) and (max-width:899px){
+  .scroll-hint { display:block; }
+}
+/* ── DESKTOP (≥900px) ── */
+@media(min-width:900px){
+  body { padding:16px; }
+  .container { padding:28px; }
 }
 
-    input{
-        padding:10px;
-        border:1px solid #ccc;
-        border-radius:8px;
-        font-size:15px;
-    }
-
-    button{
-        padding:12px;
-        border:none;
-        border-radius:8px;
-        background:#2563eb;
-        color:white;
-        cursor:pointer;
-        font-size:16px;
-        transition:0.3s;
-    }
-
-    button:hover{
-        background:#1d4ed8;
-    }
-
-    table{
-    width:100%;
-    min-width:1100px;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-    .table-wrapper{
-    width:100%;
-    overflow-x:auto;
-}
-
-    th, td{
-    border:1px solid #ddd;
-    padding:10px;
-    text-align:center;
-    white-space:nowrap;
-}
-
-    th{
-        background:#2563eb;
-        color:white;
-    }
-
-    .summary{
-        margin-top:25px;
-        background:#eef2ff;
-        padding:20px;
-        border-radius:10px;
-    }
-
-    .summary h2{
-        margin-bottom:10px;
-        color:#1e3a8a;
-    }
-
-    .delete-btn{
-        background:#dc2626;
-        padding:8px 12px;
-    }
-
-    .delete-btn:hover{
-        background:#b91c1c;
-    }
-
-    .export-btn{
-        margin-top:15px;
-        background:#059669;
-    }
-
-    .export-btn:hover{
-        background:#047857;
-    }
-
-    @media(max-width:700px){
-        table{
-            font-size:12px;
-        }
-    }
-    @media print {
-    button {
-        display:none;
-    }
-
-    body{
-        background:white;
-    }
-
-    .container{
-        box-shadow:none;
-    }
+/* PRINT */
+@media print {
+  body { background:white; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .container { box-shadow:none; padding:10px; max-width:100%; }
+  .no-print    { display:none !important; }
+  .hide-print  { display:none !important; }
+  .scroll-hint { display:none !important; }
+  .table-wrapper { overflow:visible !important; }
+  table { min-width:0 !important; width:100% !important; font-size:10px; }
+  th,td { padding:5px 4px; white-space:normal; }
+  th { background:#2563eb !important; color:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  tr:nth-child(even) { background:#f8fafc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .summary { background:#eef2ff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .s-card { background:white !important; }
+  .archive { display:none !important; }
+  .identity-section { display:none !important; }
+  .week-section { display:none !important; }
+  .edit-banner { display:none !important; }
+  .form-section { display:none !important; }
+  .card-view  { display:none !important; }
+  .table-view { display:block !important; }
+  .print-meta { display:block; margin-bottom:14px; font-size:13px; color:#374151; border-bottom:2px solid #2563eb; padding-bottom:8px; }
+  .print-meta .pm-row { display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; }
+  .print-meta .pm-item { font-size:12px; }
+  .print-meta .pm-item span { font-weight:bold; color:#1e3a8a; }
+  @page { margin:1cm; }
 }
 </style>
 </head>
 <body>
-
 <div class="container">
 
-    <h1>Ubox Solutions Load Tracker</h1>
-    <h3>Universe Carrier Inc</h3>
+  <h1>Ubox Solutions Load Tracker</h1>
+  <h3>Universe Carrier Inc</h3>
 
-<div class="week-section">
+  <!-- PRINT META (only shows when printing) -->
+  <div class="print-meta" id="printMeta"></div>
 
-    <div class="week-box">
+  <!-- IDENTITY — permanent, never cleared -->
+  <div class="identity-section no-print">
+    <div class="section-label">Your Info (saved permanently)</div>
+    <div class="identity-grid">
+      <div class="identity-box">
+        <label>Driver Name</label>
+        <input type="text" id="driverName" placeholder="e.g. John Doe">
+      </div>
+      <div class="identity-box">
+        <label>Truck #</label>
+        <input type="text" id="truckNumber" placeholder="e.g. T-1042">
+      </div>
+      <div class="identity-box">
+        <label>Trailer #</label>
+        <input type="text" id="trailerNumber" placeholder="e.g. TR-5509">
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEK DATES -->
+  <div class="week-section no-print">
+    <div class="section-label">Week Range (resets every Tuesday)</div>
+    <div class="week-grid">
+      <div class="week-box">
         <label>Week Start (Monday)</label>
         <input type="date" id="weekStart">
-    </div>
-
-    <div class="week-box">
-        <label>Week End (Next Monday)</label>
+      </div>
+      <div class="week-box">
+        <label>Week End (Sunday)</label>
         <input type="date" id="weekEnd">
+      </div>
     </div>
+  </div>
 
-</div>
+  <!-- EDIT BANNER -->
+  <div id="editBanner" class="edit-banner no-print" style="display:none;">
+    <span id="editBannerText"></span>
+    <button class="btn btn-cancel btn-sm" onclick="cancelEdit()">Cancel</button>
+  </div>
 
-
-<div class="form-grid">
-
-    <input type="text" id="loadNumber" placeholder="Load Number">
-
-    <input type="text" id="refordry" placeholder="REF or DRY">
-
-    <input type="text" id="pickup" placeholder="Pickup City">
-
-    <div>
-        <label>Pickup Date</label>
+  <!-- FORM -->
+  <div class="form-section no-print">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Load Number *</label>
+        <input type="text" id="loadNumber" placeholder="e.g. 123456">
+      </div>
+      <div class="form-group">
+        <label>REF or DRY</label>
+        <input type="text" id="refordry" placeholder="REF or DRY">
+      </div>
+      <div class="form-group">
+        <label>Pickup City *</label>
+        <input type="text" id="pickup" placeholder="e.g. Chicago, IL">
+      </div>
+      <div class="form-group">
+        <label>Delivery City *</label>
+        <input type="text" id="delivery" placeholder="e.g. Dallas, TX">
+      </div>
+      <div class="form-group">
+        <label>Miles</label>
+        <input type="number" id="miles" placeholder="e.g. 450" min="0">
+      </div>
+      <div class="form-group">
+        <label>Detention Hours</label>
+        <input type="number" id="detentionHours" placeholder="e.g. 2" min="0" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>Pickup Date *</label>
         <input type="date" id="pickupDate">
-    </div>
-
-    <div>
+      </div>
+      <div class="form-group">
         <label>Pickup Time</label>
         <input type="time" id="pickupTime">
-    </div>
-
-    <input type="text" id="delivery" placeholder="Delivery City">
-
-    <div>
-        <label>Delivery Date</label>
+      </div>
+      <div class="form-group">
+        <label>Delivery Date *</label>
         <input type="date" id="deliveryDate">
-    </div>
-
-    <div>
+      </div>
+      <div class="form-group">
         <label>Delivery Time</label>
         <input type="time" id="deliveryTime">
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <button id="addBtn" class="btn" style="width:100%;" onclick="addLoad()">Add Load</button>
+      </div>
     </div>
+  </div>
 
-    <input type="number" id="miles" placeholder="Miles">
-
-    <input type="number" id="detentionHours" placeholder="Detention Hours">
-
-    <button onclick="addLoad()">Add Load</button>
-
-</div>
-  <div class="table-wrapper">
-    <table>
+  <!-- TABLE VIEW (desktop only) -->
+  <div class="table-view">
+    <div class="scroll-hint">← Swipe table left / right →</div>
+    <div class="table-wrapper">
+      <table>
         <thead>
-    <tr>
-        <th>Load #</th>
-        <th>REF/DRY</th>
-        <th>Pickup</th>
-        <th>Pickup Date</th>
-        <th>Pickup Time</th>
-        <th>Delivery</th>
-        <th>Delivery Date</th>
-        <th>Delivery Time</th>
-        <th>Miles</th>
-        <th>Detention</th>
-        <th>Edit</th>
-        <th>Delete</th>
-    </tr>
-</thead>
-
+          <tr>
+            <th>#</th><th>Load #</th><th>REF/DRY</th>
+            <th>Pickup</th><th>Pickup Date</th><th>Pickup Time</th>
+            <th>Delivery</th><th>Delivery Date</th><th>Delivery Time</th>
+            <th>Miles</th>
+            <th class="hide-print">Miles Pay</th>
+            <th>Detention Hrs</th>
+            <th class="hide-print">Detention Pay</th>
+            <th class="hide-print">Total Pay</th>
+            <th class="no-print">Edit</th>
+            <th class="no-print">Delete</th>
+          </tr>
+        </thead>
         <tbody id="tableBody"></tbody>
-    </table>
+      </table>
     </div>
-  
+  </div>
 
-    <div class="summary">
+  <!-- CARD VIEW (phone + iPad only) -->
+  <div class="card-view" id="cardView"></div>
 
+  <!-- SUMMARY -->
+  <div class="summary">
     <h2>Weekly Summary</h2>
-
-    <p>
-        <strong>Total Miles:</strong>
-        <span id="totalMiles">0</span>
-    </p>
-
-    <p>
-        <strong>Total Detention Hours:</strong>
-        <span id="totalDetentionHours">0</span>
-    </p>
-
-    <button class="export-btn" onclick="window.print()">
-        Print / Save PDF
-    </button>
-
+    <div class="summary-grid">
+      <div class="s-card"><div class="lbl">Total Loads</div><div class="val" id="sTotalLoads">0</div></div>
+      <div class="s-card"><div class="lbl">Total Miles</div><div class="val" id="sTotalMiles">0</div></div>
+      <div class="s-card hide-print"><div class="lbl">Miles Pay (@$0.75/mi)</div><div class="val" id="sMilesPay">$0.00</div></div>
+      <div class="s-card"><div class="lbl">Total Detention Hrs</div><div class="val" id="sTotalDet">0</div></div>
+      <div class="s-card hide-print"><div class="lbl">Detention Pay (@$15/hr)</div><div class="val" id="sDetPay">$0.00</div></div>
+      <div class="s-card hide-print"><div class="lbl">Total Earnings</div><div class="val green" id="sTotal">$0.00</div></div>
     </div>
-    
-    <div class="summary" style="margin-top:20px;">
+    <div class="btn-row no-print">
+      <button class="btn btn-green" onclick="saveWeeklyPDF()">Save &amp; Print Weekly PDF</button>
+      <button class="btn" onclick="window.print()">Print Current View</button>
+    </div>
+  </div>
 
+  <!-- ARCHIVE -->
+  <div class="archive no-print">
     <h2>Saved Weekly PDFs</h2>
-
-    <div id="pdfArchive"></div>
-    <button class="export-btn" onclick="saveWeeklyPDF()">
-    Save Weekly PDF
-    </button>
-
-    </div>
-    
+    <div id="archiveList"></div>
+  </div>
 
 </div>
 
 <script>
+const RATE = 0.75, DET = 15;
+let loads = [], editIndex = -1;
+try { loads = JSON.parse(localStorage.getItem("loads") || "[]"); } catch(e) { loads = []; }
 
-const RATE_PER_MILE = 0.75;
-const DETENTION_RATE = 15;
+/* ---- IDENTITY FIELDS — permanent, saved on every keystroke ---- */
+const ID_KEYS = ["driverName","truckNumber","trailerNumber"];
+ID_KEYS.forEach(function(id){
+  const el = document.getElementById(id);
+  // Load saved value
+  el.value = localStorage.getItem(id) || "";
+  // Save on every keystroke and change
+  function persist(){ localStorage.setItem(id, el.value); }
+  el.addEventListener("input",  persist);
+  el.addEventListener("change", persist);
+});
 
-let loads = JSON.parse(localStorage.getItem("loads")) || [];
-let editIndex = -1;
+/* ---- WEEK FIELDS — saved on change, cleared by Tuesday reset ---- */
+const WEEK_KEYS = ["weekStart","weekEnd"];
+WEEK_KEYS.forEach(function(id){
+  const el = document.getElementById(id);
+  el.value = localStorage.getItem(id) || "";
+  el.addEventListener("change", function(){ localStorage.setItem(id, el.value); });
+});
 
+/* ---- INIT ---- */
 checkWeeklyReset();
 renderTable();
 renderArchive();
 
-function addLoad(){
-
-    const loadNumber = document.getElementById("loadNumber").value;
-
-    const refordry = document.getElementById("refordry").value;
-
-    const pickup = document.getElementById("pickup").value;
-
-    const pickupDate = document.getElementById("pickupDate").value;
-
-    const pickupTime = document.getElementById("pickupTime").value;
-
-    const delivery = document.getElementById("delivery").value;
-
-    const deliveryDate = document.getElementById("deliveryDate").value;
-
-    const deliveryTime = document.getElementById("deliveryTime").value;
-
-    const miles = parseFloat(document.getElementById("miles").value) || 0;
-
-    const detentionHours = parseFloat(document.getElementById("detentionHours").value) || 0;
-
-    const milesPay = miles * RATE_PER_MILE;
-
-    const detentionPay = detentionHours * DETENTION_RATE;
-
-    const total = milesPay + detentionPay;
-
-    const load = {
-
-        loadNumber,
-
-        refordry,
-
-        pickup,
-
-        pickupDate,
-
-        pickupTime,
-
-        delivery,
-
-        deliveryDate,
-
-        deliveryTime,
-
-        miles,
-
-        milesPay,
-
-        detentionHours,
-
-        detentionPay,
-
-        total
-    };
-
-    if(
-    !loadNumber ||
-    !pickup ||
-    !delivery ||
-    !pickupDate ||
-    !deliveryDate
-){
-    alert("Please fill all required fields.");
-    return;
-}
-
-if(editIndex === -1){
-    loads.push(load);
-}else{
-    loads[editIndex] = load;
-    editIndex = -1;
-}
-
-localStorage.setItem("loads", JSON.stringify(loads));
-
-clearInputs();
-
-renderTable();
-}
-
-function renderTable(){
-
-    const tableBody = document.getElementById("tableBody");
-
-    tableBody.innerHTML = "";
-
-    let totalMiles = 0;
-    let totalDetentionHours = 0;
-
-    loads.forEach((load,index)=>{
-      
-           totalMiles += load.miles;
-       totalDetentionHours += load.detentionHours;
-
-        tableBody.innerHTML += `
-<tr>
-    <td>${load.loadNumber}</td>
-    <td>${load.refordry}</td>
-    <td>${load.pickup}</td>
-    <td>${load.pickupDate}</td>
-    <td>${load.pickupTime}</td>
-    <td>${load.delivery}</td>
-    <td>${load.deliveryDate}</td>
-    <td>${load.deliveryTime}</td>
-    <td>${load.miles}</td>
-    <td>${load.detentionHours} hr</td>
-    <td>
-    <button onclick="editLoad(${index})">
-        Edit
-    </button>
-</td>
-
-<td>
-    <button class="delete-btn" onclick="deleteLoad(${index})">
-        Delete
-    </button>
-</td>
-</tr>
-`;
-    });
-
-    document.getElementById("totalMiles").innerText = totalMiles;
-   document.getElementById("totalDetentionHours").innerText = totalDetentionHours;
-}
-
-function deleteLoad(index){
-
-    loads.splice(index,1);
-
-    localStorage.setItem("loads", JSON.stringify(loads));
-
-    renderTable();
-}
-
-function editLoad(index){
-
-    const load = loads[index];
-
-    document.getElementById("loadNumber").value = load.loadNumber;
-
-    document.getElementById("refordry").value = load.refordry;
-
-    document.getElementById("pickup").value = load.pickup;
-
-    document.getElementById("pickupDate").value = load.pickupDate;
-
-    document.getElementById("pickupTime").value = load.pickupTime;
-
-    document.getElementById("delivery").value = load.delivery;
-
-    document.getElementById("deliveryDate").value = load.deliveryDate;
-
-    document.getElementById("deliveryTime").value = load.deliveryTime;
-
-    document.getElementById("miles").value = load.miles;
-
-    document.getElementById("detentionHours").value = load.detentionHours;
-
-    editIndex = index;
-}
-   
-
-function clearInputs(){
-
-    document.getElementById("loadNumber").value = "";
-
-    document.getElementById("refordry").value = "";
-
-    document.getElementById("pickup").value = "";
-
-    document.getElementById("pickupDate").value = "";
-
-    document.getElementById("pickupTime").value = "";
-
-    document.getElementById("delivery").value = "";
-
-    document.getElementById("deliveryDate").value = "";
-
-    document.getElementById("deliveryTime").value = "";
-
-    document.getElementById("miles").value = "";
-
-    document.getElementById("detentionHours").value = "";
-}
-
-
+/* ---- WEEKLY RESET ---- */
 function checkWeeklyReset(){
-
-    const lastReset = localStorage.getItem("lastResetDate");
-
-    const today = new Date();
-
-    const todayString = today.toISOString().split("T")[0];
-
-    const day = today.getDay();
-
-    // Tuesday = 2
-    if(day === 2 && lastReset !== todayString){
-
-        // Clear loads
-        loads = [];
-
-        localStorage.removeItem("loads");
-
-        // Clear week dates
-        localStorage.removeItem("weekStart");
-        localStorage.removeItem("weekEnd");
-
-        // Clear week input fields
-        document.getElementById("weekStart").value = "";
-        document.getElementById("weekEnd").value = "";
-
-        // Reset summary
-        document.getElementById("totalMiles").innerText = 0;
-        document.getElementById("totalDetentionHours").innerText = 0;
-
-        // Clear all inputs
-        clearInputs();
-
-        // Re-render table
-        renderTable();
-
-        // Save reset date
-        localStorage.setItem("lastResetDate", todayString);
+  const lastReset = localStorage.getItem("lastResetDate");
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  if(today.getDay() === 2 && lastReset !== todayStr){
+    const ok = confirm(
+      "It's Tuesday — weekly reset time.\n\n" +
+      "Your loads and week dates will be cleared.\n" +
+      "Driver Name, Truck #, and Trailer # stay as-is.\n" +
+      "Your saved weekly PDFs in the archive are NOT affected.\n\n" +
+      "Continue?"
+    );
+    if(ok){
+      loads = [];
+      localStorage.setItem("loads", JSON.stringify(loads));
+      WEEK_KEYS.forEach(function(id){
+        localStorage.removeItem(id);
+        document.getElementById(id).value = "";
+      });
+      localStorage.setItem("lastResetDate", todayStr);
+      renderTable();
     }
+  }
 }
 
-function saveWeeklyPDF(){
+/* ---- ADD / UPDATE LOAD ---- */
+function addLoad(){
+  const loadNumber   = g("loadNumber");
+  const refordry     = g("refordry");
+  const pickup       = g("pickup");
+  const pickupDate   = g("pickupDate");
+  const pickupTime   = g("pickupTime");
+  const delivery     = g("delivery");
+  const deliveryDate = g("deliveryDate");
+  const deliveryTime = g("deliveryTime");
+  const miles        = parseFloat(g("miles")) || 0;
+  const detention    = parseFloat(g("detentionHours")) || 0;
 
-    const weekStartValue = document.getElementById("weekStart").value;
+  if(!loadNumber || !pickup || !delivery || !pickupDate || !deliveryDate){
+    alert("Please fill all required fields:\nLoad #, Pickup City, Pickup Date, Delivery City, Delivery Date.");
+    return;
+  }
 
-    const weekEndValue = document.getElementById("weekEnd").value;
+  const milesPay = miles * RATE, detPay = detention * DET;
+  const load = { loadNumber, refordry, pickup, pickupDate, pickupTime,
+                 delivery, deliveryDate, deliveryTime,
+                 miles, detentionHours: detention, milesPay, detentionPay: detPay, total: milesPay + detPay };
 
-    if(!weekStartValue || !weekEndValue){
-        alert("Please select week start and end dates.");
-        return;
-    }
+  if(editIndex === -1){ loads.push(load); }
+  else { loads[editIndex] = load; cancelEdit(); }
 
-    const archive = JSON.parse(localStorage.getItem("pdfArchive")) || [];
+  saveLoads(); clearForm(); renderTable();
+}
 
-    const pdfName = `Week ${weekStartValue} to ${weekEndValue}`;
+/* ---- EDIT / DELETE ---- */
+function editLoad(i){
+  const l = loads[i];
+  s("loadNumber",    l.loadNumber);    s("refordry",      l.refordry);
+  s("pickup",        l.pickup);        s("pickupDate",    l.pickupDate);
+  s("pickupTime",    l.pickupTime);    s("delivery",      l.delivery);
+  s("deliveryDate",  l.deliveryDate);  s("deliveryTime",  l.deliveryTime);
+  s("miles",         l.miles);         s("detentionHours",l.detentionHours);
+  editIndex = i;
+  document.getElementById("addBtn").textContent = "Update Load";
+  document.getElementById("editBanner").style.display = "flex";
+  document.getElementById("editBannerText").textContent = "Editing load #"+(i+1)+" — update fields and press \"Update Load\"";
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
 
-    archive.push({
-        name: pdfName,
-        date: new Date().toLocaleString()
+function deleteLoad(i){
+  if(!confirm("Delete this load? This cannot be undone.")) return;
+  loads.splice(i,1); saveLoads(); renderTable();
+}
+
+function cancelEdit(){
+  editIndex = -1;
+  document.getElementById("addBtn").textContent = "Add Load";
+  document.getElementById("editBanner").style.display = "none";
+  clearForm();
+}
+
+/* ---- RENDER TABLE (desktop) ---- */
+function renderTable(displayLoads){
+  displayLoads = displayLoads || loads;
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  let miles=0, det=0, mPay=0, dPay=0, total=0;
+
+  if(displayLoads.length === 0){
+    const tr = tbody.insertRow(), td = tr.insertCell();
+    td.colSpan = 16; td.style.cssText = "color:#9ca3af;padding:24px;text-align:center;";
+    td.textContent = "No loads yet — fill in the form above to add your first load.";
+  } else {
+    displayLoads.forEach(function(l, i){
+      miles += l.miles; det += l.detentionHours;
+      mPay += l.milesPay; dPay += l.detentionPay; total += l.total;
+      const tr = tbody.insertRow();
+      function cell(text, cls){ const td = tr.insertCell(); td.textContent = text; if(cls) td.className = cls; }
+      cell(i+1); cell(l.loadNumber); cell(l.refordry||"—");
+      cell(l.pickup); cell(l.pickupDate); cell(l.pickupTime||"—");
+      cell(l.delivery); cell(l.deliveryDate); cell(l.deliveryTime||"—");
+      cell(l.miles);
+      cell("$"+l.milesPay.toFixed(2),     "pay-green hide-print");
+      cell(l.detentionHours+" hr");
+      cell("$"+l.detentionPay.toFixed(2), "pay-amber hide-print");
+      cell("$"+l.total.toFixed(2),        "pay-blue hide-print");
+
+      if(!displayLoads._readonly){
+        const eTd = tr.insertCell(); eTd.className = "no-print";
+        const eBtn = document.createElement("button");
+        eBtn.textContent="Edit"; eBtn.className="btn btn-amber btn-sm";
+        eBtn.onclick=(function(idx){ return function(){ editLoad(idx); }; })(i);
+        eTd.appendChild(eBtn);
+
+        const dTd = tr.insertCell(); dTd.className = "no-print";
+        const dBtn = document.createElement("button");
+        dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
+        dBtn.onclick=(function(idx){ return function(){ deleteLoad(idx); }; })(i);
+        dTd.appendChild(dBtn);
+      } else {
+        const e = tr.insertCell(); e.className = "no-print";
+        const d = tr.insertCell(); d.className = "no-print";
+      }
     });
+  }
 
-    localStorage.setItem("pdfArchive", JSON.stringify(archive));
+  document.getElementById("sTotalLoads").textContent = displayLoads.length;
+  document.getElementById("sTotalMiles").textContent  = miles.toLocaleString();
+  document.getElementById("sMilesPay").textContent    = "$"+mPay.toFixed(2);
+  document.getElementById("sTotalDet").textContent    = det;
+  document.getElementById("sDetPay").textContent      = "$"+dPay.toFixed(2);
+  document.getElementById("sTotal").textContent       = "$"+total.toFixed(2);
 
-    renderArchive();
-
-    window.print();
+  renderCards(displayLoads);
 }
+
+/* ---- RENDER CARDS (mobile / iPad) ---- */
+function renderCards(displayLoads){
+  const container = document.getElementById("cardView");
+  container.innerHTML = "";
+
+  if(displayLoads.length === 0){
+    const el = document.createElement("div");
+    el.className = "card-empty";
+    el.textContent = "No loads yet — fill in the form above to add your first load.";
+    container.appendChild(el);
+    return;
+  }
+
+  displayLoads.forEach(function(l, i){
+    const card = document.createElement("div");
+    card.className = "load-card";
+
+    // Header
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<div class="card-num">'+(i+1)+'</div>' +
+        '<div class="card-load-num">Load '+l.loadNumber+'</div>' +
+        (l.refordry ? '<div class="card-badge">'+l.refordry+'</div>' : '') +
+      '</div>' +
+      // Legs
+      '<div class="card-legs">' +
+        '<div>' +
+          '<div class="card-leg-lbl">Pickup</div>' +
+          '<div class="card-leg-city">'+l.pickup+'</div>' +
+          '<div class="card-leg-dt">'+l.pickupDate+(l.pickupTime?' @ '+l.pickupTime:'')+'</div>' +
+        '</div>' +
+        '<div class="card-arrow">→</div>' +
+        '<div>' +
+          '<div class="card-leg-lbl">Delivery</div>' +
+          '<div class="card-leg-city">'+l.delivery+'</div>' +
+          '<div class="card-leg-dt">'+l.deliveryDate+(l.deliveryTime?' @ '+l.deliveryTime:'')+'</div>' +
+        '</div>' +
+      '</div>' +
+      // Stats
+      '<div class="card-stats">' +
+        '<div><div class="card-stat-lbl">Miles</div><div class="card-stat-val">'+l.miles+'</div></div>' +
+        '<div><div class="card-stat-lbl">Detention</div><div class="card-stat-val">'+l.detentionHours+' hr</div></div>' +
+      '</div>' +
+      // Pay (screen only)
+      '<div class="card-pay hide-print">' +
+        '<span class="pay-green">Miles: $'+l.milesPay.toFixed(2)+'</span>' +
+        '<span class="pay-amber">Det: $'+l.detentionPay.toFixed(2)+'</span>' +
+        '<span class="pay-blue">Total: $'+l.total.toFixed(2)+'</span>' +
+      '</div>';
+
+    // Actions (not for readonly / reprint)
+    if(!displayLoads._readonly){
+      const actions = document.createElement("div");
+      actions.className = "card-actions no-print";
+
+      const eBtn = document.createElement("button");
+      eBtn.textContent="Edit"; eBtn.className="btn btn-amber btn-sm";
+      eBtn.onclick=(function(idx){ return function(){ editLoad(idx); }; })(i);
+
+      const dBtn = document.createElement("button");
+      dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
+      dBtn.onclick=(function(idx){ return function(){ deleteLoad(idx); }; })(i);
+
+      actions.appendChild(eBtn);
+      actions.appendChild(dBtn);
+      card.appendChild(actions);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+/* ---- PRINT META ---- */
+function updatePrintMeta(ws, we){
+  const dn = localStorage.getItem("driverName")    || "";
+  const tn = localStorage.getItem("truckNumber")   || "";
+  const tr = localStorage.getItem("trailerNumber") || "";
+  const parts = [];
+  if(dn) parts.push('<div class="pm-item">Driver: <span>'+dn+'</span></div>');
+  if(tn) parts.push('<div class="pm-item">Truck #: <span>'+tn+'</span></div>');
+  if(tr) parts.push('<div class="pm-item">Trailer #: <span>'+tr+'</span></div>');
+  const weekStr = (ws||"") + (ws && we ? " → " : "") + (we||"");
+  if(weekStr) parts.push('<div class="pm-item">Week: <span>'+weekStr+'</span></div>');
+  document.getElementById("printMeta").innerHTML =
+    '<div class="pm-row">'+parts.join("")+'</div>';
+}
+
+/* ---- SAVE & PRINT ---- */
+function saveWeeklyPDF(){
+  const ws = localStorage.getItem("weekStart") || "";
+  const we = localStorage.getItem("weekEnd")   || "";
+  if(!ws || !we){ alert("Please set week start and end dates."); return; }
+  if(loads.length === 0){ alert("No loads to save."); return; }
+
+  let miles=0, det=0, total=0;
+  loads.forEach(function(l){ miles+=l.miles; det+=l.detentionHours; total+=l.total; });
+
+  const entry = {
+    name:          "Week "+ws+" to "+we,
+    savedDate:     new Date().toLocaleString(),
+    weekStart:     ws, weekEnd: we,
+    driverName:    localStorage.getItem("driverName")    || "",
+    truckNumber:   localStorage.getItem("truckNumber")   || "",
+    trailerNumber: localStorage.getItem("trailerNumber") || "",
+    loads:         JSON.parse(JSON.stringify(loads)),
+    totalMiles:    miles, totalDetentionHours: det, totalPay: total
+  };
+
+  const arc = getArchive(); arc.push(entry);
+  localStorage.setItem("pdfArchive", JSON.stringify(arc));
+  renderArchive();
+  updatePrintMeta(ws, we);
+  setTimeout(function(){ window.print(); }, 150);
+}
+
+/* ---- ARCHIVE ---- */
+function getArchive(){ try { return JSON.parse(localStorage.getItem("pdfArchive")||"[]"); } catch(e){ return []; } }
 
 function renderArchive(){
+  const container = document.getElementById("archiveList");
+  const arc = getArchive();
+  container.innerHTML = "";
+  if(arc.length === 0){
+    const p = document.createElement("p");
+    p.style.cssText = "color:#6b7280;margin-top:8px;font-size:14px;";
+    p.textContent = "No saved PDFs yet. Click \"Save & Print Weekly PDF\" to save this week.";
+    container.appendChild(p); return;
+  }
+  arc.forEach(function(item, i){
+    const div = document.createElement("div"); div.className = "arc-item";
+    const info = document.createElement("div"); info.className = "arc-info";
+    const strong = document.createElement("strong"); strong.textContent = item.name;
+    const span = document.createElement("span");
+    const parts = [];
+    if(item.driverName)    parts.push(item.driverName);
+    if(item.truckNumber)   parts.push("Truck "+item.truckNumber);
+    if(item.trailerNumber) parts.push("Trailer "+item.trailerNumber);
+    parts.push(item.loads.length+" loads");
+    parts.push("Saved "+item.savedDate);
+    span.textContent = parts.join(" · ");
+    info.appendChild(strong); info.appendChild(span);
 
-    const archiveContainer = document.getElementById("pdfArchive");
+    const actions = document.createElement("div"); actions.className = "arc-actions";
 
-    const archive = JSON.parse(localStorage.getItem("pdfArchive")) || [];
+    const rBtn = document.createElement("button");
+    rBtn.textContent="Reprint"; rBtn.className="btn btn-green btn-sm";
+    rBtn.onclick=(function(entry){ return function(){ reprintEntry(entry); }; })(item);
 
-    archiveContainer.innerHTML = "";
+    const dBtn = document.createElement("button");
+    dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
+    dBtn.onclick=(function(idx){ return function(){
+      if(!confirm("Delete this saved week from the archive?")) return;
+      const a=getArchive(); a.splice(idx,1);
+      localStorage.setItem("pdfArchive",JSON.stringify(a)); renderArchive();
+    }; })(i);
 
-    if(archive.length === 0){
-        archiveContainer.innerHTML = "<p>No saved weekly PDFs yet.</p>";
-        return;
-    }
-
-    archive.forEach((item,index)=>{
-
-        archiveContainer.innerHTML += `
-        <div style="
-            background:white;
-            padding:10px;
-            margin-top:10px;
-            border-radius:8px;
-            border:1px solid #ddd;
-        ">
-            <strong>${item.name}</strong><br>
-            Saved: ${item.date}
-        </div>
-        `;
-    });
+    actions.appendChild(rBtn); actions.appendChild(dBtn);
+    div.appendChild(info); div.appendChild(actions);
+    container.appendChild(div);
+  });
 }
 
+/* ---- REPRINT — identity fields NEVER touched ---- */
+function reprintEntry(entry){
+  // Update print meta with archive entry's week dates (identity always shows current user info)
+  updatePrintMeta(entry.weekStart, entry.weekEnd);
+  // Mark as readonly so Edit/Delete buttons don't show for archive loads
+  const arcLoads = entry.loads.slice();
+  arcLoads._readonly = true;
+  renderTable(arcLoads);
+  setTimeout(function(){
+    window.print();
+    // Restore live view
+    updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
+    renderTable();
+  }, 150);
+}
 
+/* ---- HELPERS ---- */
+function g(id){ return document.getElementById(id).value.trim(); }
+function s(id, val){ document.getElementById(id).value = val; }
+function saveLoads(){ localStorage.setItem("loads", JSON.stringify(loads)); }
+function clearForm(){
+  ["loadNumber","refordry","pickup","pickupDate","pickupTime",
+   "delivery","deliveryDate","deliveryTime","miles","detentionHours"]
+  .forEach(function(id){ document.getElementById(id).value = ""; });
+}
 
-
-
-
-const weekStart = document.getElementById("weekStart");
-const weekEnd = document.getElementById("weekEnd");
-
-weekStart.value = localStorage.getItem("weekStart") || "";
-weekEnd.value = localStorage.getItem("weekEnd") || "";
-
-weekStart.addEventListener("change", () => {
-    localStorage.setItem("weekStart", weekStart.value);
+// Set initial print meta
+updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
+// Update print meta when week dates change
+["weekStart","weekEnd"].forEach(function(id){
+  document.getElementById(id).addEventListener("change", function(){
+    updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
+  });
 });
-
-weekEnd.addEventListener("change", () => {
-    localStorage.setItem("weekEnd", weekEnd.value);
-});
-
 </script>
 
 <script>
-
-if ("serviceWorker" in navigator) {
-
-    navigator.serviceWorker.register("service-worker.js")
-    .then(() => {
-        console.log("Service Worker Registered");
-    });
-
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js")
+  .then(function(){ console.log("Service Worker Registered"); });
 }
-
 </script>
 </body>
 </html>
