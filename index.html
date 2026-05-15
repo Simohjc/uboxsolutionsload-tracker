@@ -1,731 +1,888 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ubox Solutions Load Tracker</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
-body { background:#f4f6f9; padding:10px; -webkit-text-size-adjust:100%; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f4f6f9;color:#111827;min-height:100vh}
+input,button,select,textarea{font-family:inherit}
+button{cursor:pointer}
 
-.container { max-width:1300px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,.1); }
-h1 { text-align:center; margin-bottom:6px; color:#1e3a8a; font-size:clamp(18px,4vw,26px); }
-h3 { text-align:center; margin-bottom:20px; color:#1e3a8a; font-size:clamp(14px,3vw,18px); }
+/* ── PIN SCREEN ── */
+#pin-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f6f9}
+.pin-card{background:#fff;border-radius:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.1);padding:2rem;width:100%;max-width:20rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.pin-logo-title{font-size:1.4rem;font-weight:700;color:#1e3a8a;text-align:center}
+.pin-logo-sub{font-size:.8rem;color:#6b7280;margin-top:.2rem;text-align:center}
+.pin-lock-icon{width:3.5rem;height:3.5rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center}
+.pin-lock-icon svg{width:1.6rem;height:1.6rem;color:#2563eb}
+.pin-label{font-size:.875rem;font-weight:500;color:#4b5563}
+.pin-dots{display:flex;gap:1rem}
+.pin-dot{width:1rem;height:1rem;border-radius:50%;border:2px solid #d1d5db;background:transparent;transition:background .15s,border-color .15s}
+.pin-dot.filled{background:#2563eb;border-color:#2563eb}
+.pin-dots.shake{animation:shake .4s ease-in-out}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.pin-error{font-size:.75rem;color:#dc2626;font-weight:500;min-height:1rem;text-align:center}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;width:100%}
+.pin-key{height:3.5rem;border-radius:.75rem;border:none;font-size:1.25rem;font-weight:600;cursor:pointer;transition:transform .1s,background .15s}
+.pin-key:active{transform:scale(.94)}
+.pin-key.num{background:#eef2ff;color:#1e3a8a}
+.pin-key.num:hover{background:#dbeafe}
+.pin-key.back{background:#f3f4f6;color:#6b7280}
+.pin-key.back:hover{background:#e5e7eb}
+.pin-key.empty{background:transparent;pointer-events:none}
+.pin-hint{font-size:.7rem;color:#9ca3af;text-align:center}
+.pin-hint strong{color:#6b7280}
 
-/* IDENTITY */
-.section-label { font-size:11px; font-weight:bold; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
-.identity-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
-.identity-box { background:#f0fdf4; padding:10px; border-radius:10px; border:2px solid #bbf7d0; }
-.identity-box label { display:block; margin-bottom:4px; font-weight:bold; color:#166534; font-size:12px; }
-.identity-box input { font-size:14px; padding:8px 10px; }
+/* ── MAIN APP ── */
+#app{display:none;padding:.75rem;max-width:1280px;margin:0 auto}
+@media(min-width:640px){#app{padding:1.25rem}}
+@media(min-width:1024px){#app{padding:2rem}}
 
-/* WEEK */
-.week-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px; }
-.week-box { background:#eef2ff; padding:10px; border-radius:10px; border:2px solid #c7d2fe; }
-.week-box label { display:block; margin-bottom:4px; font-weight:bold; color:#1e3a8a; font-size:12px; }
-.week-box input { font-size:14px; padding:8px 10px; }
+.card{background:#fff;border-radius:.75rem;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:1.25rem;margin-bottom:1.25rem}
+@media(min-width:640px){.card{padding:1.75rem}}
 
-/* INPUTS */
-input[type="text"],input[type="number"],input[type="date"],input[type="time"] {
-  width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px; font-size:15px;
-  -webkit-appearance:none; appearance:none;
-}
-input:focus { outline:2px solid #2563eb; border-color:#2563eb; }
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.header-title{font-size:1.5rem;font-weight:700;color:#1e3a8a}
+.header-sub{font-size:.8rem;color:#6b7280;margin-top:.1rem}
+.header-actions{display:flex;gap:.5rem;align-items:center}
+.btn-icon{padding:.4rem;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;color:#6b7280;line-height:0}
+.btn-icon:hover{background:#f9fafb}
+.btn-lock{font-size:.8rem;padding:.4rem .75rem;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;color:#4b5563}
+.btn-lock:hover{background:#f9fafb}
 
-/* FORM */
-.form-section { margin-bottom:20px; }
-.form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.form-group { min-width:0; }
-.form-group label { display:block; margin-bottom:4px; font-size:13px; color:#1e3a8a; font-weight:bold; }
-@media(min-width:600px){
-  .form-grid { grid-template-columns:repeat(3,1fr); gap:12px; }
-}
-@media(min-width:900px){
-  .form-grid { grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
-}
+/* Section labels */
+.section-label{font-size:.7rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.65rem}
 
-/* BUTTONS */
-.btn { padding:11px 18px; border:none; border-radius:8px; background:#2563eb; color:white; cursor:pointer; font-size:15px; transition:.2s; touch-action:manipulation; }
-.btn:hover  { background:#1d4ed8; }
-.btn-cancel { background:#6b7280; } .btn-cancel:hover { background:#4b5563; }
-.btn-red    { background:#dc2626; } .btn-red:hover    { background:#b91c1c; }
-.btn-amber  { background:#d97706; } .btn-amber:hover  { background:#b45309; }
-.btn-green  { background:#059669; } .btn-green:hover  { background:#047857; }
-.btn-sm { padding:7px 12px; font-size:13px; }
-.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+/* Grid inputs */
+.grid-3{display:grid;grid-template-columns:1fr;gap:.65rem}
+@media(min-width:640px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+.grid-2{display:grid;grid-template-columns:1fr;gap:.65rem}
+@media(min-width:640px){.grid-2{grid-template-columns:repeat(2,1fr)}}
 
-/* EDIT BANNER */
-.edit-banner {
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
-  background:#fef3c7; border:1px solid #f59e0b; border-radius:8px;
-  padding:10px 14px; margin-bottom:12px; color:#92400e; font-weight:bold; font-size:14px;
-}
+.field-card{border-radius:.75rem;border:2px solid;padding:.65rem}
+.field-card.green{background:#f0fdf4;border-color:#bbf7d0}
+.field-card.blue{background:#eef2ff;border-color:#c7d2fe}
+.field-label{font-size:.7rem;font-weight:700;margin-bottom:.3rem}
+.field-card.green .field-label{color:#166534}
+.field-card.blue .field-label{color:#1e3a8a}
+input[type="text"],input[type="number"],input[type="date"],input[type="time"],input[type="password"]{
+  width:100%;padding:.5rem .65rem;border-radius:.5rem;border:1px solid #e5e7eb;font-size:.85rem;outline:none;background:#fff}
+input:focus{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.15)}
 
-/* TABLE */
-.scroll-hint { display:none; text-align:center; font-size:12px; color:#9ca3af; padding:4px 0 8px; }
-.table-wrapper { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:20px; border-radius:8px; }
-table { width:100%; min-width:900px; border-collapse:collapse; }
-th,td { border:1px solid #ddd; padding:9px 8px; text-align:center; white-space:nowrap; font-size:13px; }
-th { background:#2563eb; color:white; }
-tr:nth-child(even) { background:#f8fafc; }
-.pay-green { color:#059669; font-weight:bold; }
-.pay-amber { color:#d97706; font-weight:bold; }
-.pay-blue  { color:#1e3a8a; font-weight:bold; }
+/* Form grid */
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem}
+@media(min-width:768px){.form-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.form-grid{grid-template-columns:repeat(5,1fr)}}
+.form-field label{display:block;font-size:.7rem;font-weight:700;color:#1e3a8a;margin-bottom:.25rem}
+.btn-add{width:100%;height:2.5rem;border-radius:.5rem;border:none;background:#2563eb;color:#fff;font-size:.85rem;font-weight:600;margin-top:1.4rem}
+.btn-add:hover{background:#1d4ed8}
+.btn-add:disabled{opacity:.6;cursor:not-allowed}
 
-/* SUMMARY */
-.summary { margin-top:24px; background:#eef2ff; padding:18px; border-radius:10px; }
-.summary h2 { margin-bottom:12px; color:#1e3a8a; font-size:clamp(15px,3vw,20px); }
-.summary-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
-.s-card { background:white; padding:12px 14px; border-radius:8px; border:1px solid #c7d2fe; }
-.s-card .lbl { font-size:11px; color:#6b7280; margin-bottom:4px; }
-.s-card .val { font-size:17px; font-weight:bold; color:#1e3a8a; }
-.s-card .val.green { color:#059669; }
-@media(min-width:600px){
-  .summary-grid { grid-template-columns:repeat(3,1fr); }
-}
-@media(min-width:900px){
-  .summary-grid { grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
-  .s-card .val { font-size:19px; }
-}
+/* Edit banner */
+.edit-banner{display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;
+  background:#fef3c7;border:1px solid #f59e0b;border-radius:.5rem;padding:.65rem 1rem;margin-bottom:.75rem;
+  color:#92400e;font-size:.82rem;font-weight:600}
+.edit-banner.visible{display:flex}
+.btn-cancel-edit{padding:.3rem .65rem;border-radius:.5rem;border:none;background:#6b7280;color:#fff;font-size:.75rem}
+.btn-cancel-edit:hover{background:#4b5563}
 
-/* ARCHIVE */
-.archive { margin-top:20px; background:#eef2ff; padding:18px; border-radius:10px; }
-.archive h2 { margin-bottom:12px; color:#1e3a8a; font-size:clamp(15px,3vw,20px); }
-.arc-item { background:white; padding:12px 14px; margin-top:10px; border-radius:8px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-.arc-info strong { display:block; color:#1e3a8a; font-size:14px; }
-.arc-info span { font-size:12px; color:#6b7280; }
-.arc-actions { display:flex; gap:8px; flex-shrink:0; }
+/* Table */
+.table-wrap{overflow-x:auto;margin-bottom:.5rem}
+table{width:100%;min-width:900px;border-collapse:collapse;font-size:.8rem}
+thead tr{background:#2563eb;color:#fff}
+th,td{padding:.45rem .5rem;text-align:center;border:1px solid #bfdbfe}
+thead th{font-weight:600;white-space:nowrap}
+tbody tr:nth-child(even){background:#f8fafc}
+td.green{color:#059669;font-weight:600}
+td.amber{color:#d97706;font-weight:600}
+td.navy{color:#1e3a8a;font-weight:700}
+.btn-edit-row{padding:.25rem .5rem;border-radius:.35rem;border:none;background:#d97706;color:#fff;font-size:.72rem}
+.btn-edit-row:hover{background:#b45309}
+.btn-del-row{padding:.25rem .5rem;border-radius:.35rem;border:none;background:#dc2626;color:#fff;font-size:.72rem}
+.btn-del-row:hover{background:#b91c1c}
 
-/* ── CARD VIEW (mobile / iPad) ── */
-.card-view { display:none; margin-top:16px; }
-.load-card {
-  background:white; border:1px solid #e5e7eb; border-radius:12px;
-  padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06);
-}
-.card-head {
-  display:flex; align-items:center; gap:10px;
-  padding-bottom:10px; margin-bottom:10px; border-bottom:2px solid #eef2ff;
-}
-.card-num {
-  width:28px; height:28px; border-radius:50%; background:#2563eb; color:white;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:bold; flex-shrink:0;
-}
-.card-load-num { font-size:15px; font-weight:bold; color:#1e3a8a; flex:1; }
-.card-badge {
-  background:#eef2ff; color:#2563eb; border-radius:6px;
-  padding:3px 10px; font-size:12px; font-weight:bold;
-}
-.card-legs {
-  display:grid; grid-template-columns:1fr auto 1fr;
-  gap:8px; align-items:start; margin-bottom:10px;
-}
-.card-leg-lbl {
-  font-size:10px; color:#9ca3af; text-transform:uppercase;
-  font-weight:bold; letter-spacing:.05em; margin-bottom:2px;
-}
-.card-leg-city { font-size:14px; font-weight:bold; color:#111827; white-space:normal; word-break:break-word; }
-.card-leg-dt { font-size:12px; color:#6b7280; margin-top:2px; }
-.card-arrow { color:#9ca3af; font-size:20px; text-align:center; padding-top:14px; }
-.card-stats {
-  display:flex; gap:20px; padding:8px 0;
-  border-top:1px solid #f3f4f6; border-bottom:1px solid #f3f4f6;
-  margin-bottom:10px;
-}
-.card-stat-lbl { font-size:10px; color:#9ca3af; text-transform:uppercase; font-weight:bold; }
-.card-stat-val { font-size:15px; font-weight:bold; color:#1e3a8a; }
-.card-pay {
-  display:flex; gap:12px; flex-wrap:wrap;
-  font-size:13px; font-weight:bold; margin-bottom:10px;
-}
-.card-actions { display:flex; gap:8px; justify-content:flex-end; }
-.card-empty {
-  text-align:center; color:#9ca3af; padding:24px;
-  background:#f9fafb; border-radius:10px; font-size:14px;
-}
-/* Show cards, hide table on mobile + iPad */
-@media(max-width:899px){
-  .table-view { display:none !important; }
-  .card-view  { display:block; }
-}
+/* Mobile cards */
+.mobile-cards{display:none}
+@media(max-width:1023px){.table-wrap{display:none}.mobile-cards{display:block}}
+.load-card{background:#fff;border:1px solid #e5e7eb;border-radius:.75rem;padding:1rem;margin-bottom:.65rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.load-card-header{display:flex;align-items:center;gap:.6rem;padding-bottom:.65rem;margin-bottom:.65rem;border-bottom:2px solid #eef2ff}
+.load-num-badge{width:1.6rem;height:1.6rem;border-radius:50%;background:#2563eb;color:#fff;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.load-card-title{font-weight:700;color:#1e3a8a;flex:1}
+.badge-type{background:#eef2ff;color:#2563eb;border-radius:.3rem;padding:.1rem .4rem;font-size:.72rem;font-weight:700}
+.route-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:.4rem;align-items:start;margin-bottom:.65rem}
+.route-label{font-size:.65rem;text-transform:uppercase;font-weight:700;color:#9ca3af;margin-bottom:.15rem}
+.route-city{font-weight:700;font-size:.85rem}
+.route-date{font-size:.75rem;color:#6b7280}
+.route-arrow{color:#d1d5db;font-size:1.2rem;padding-top:.6rem}
+.pay-row{display:flex;gap:1.25rem;padding:.5rem 0;border-top:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;margin-bottom:.65rem;font-size:.82rem;font-weight:600}
+.pay-row .green{color:#059669}
+.pay-row .amber{color:#d97706}
+.pay-row .navy{color:#1e3a8a}
+.card-actions{display:flex;gap:.5rem;justify-content:flex-end}
+.btn-card-edit{padding:.35rem .75rem;border-radius:.5rem;border:none;background:#d97706;color:#fff;font-size:.8rem;font-weight:500}
+.btn-card-edit:hover{background:#b45309}
+.btn-card-del{padding:.35rem .75rem;border-radius:.5rem;border:none;background:#dc2626;color:#fff;font-size:.8rem;font-weight:500}
+.btn-card-del:hover{background:#b91c1c}
+.empty-msg{text-align:center;color:#9ca3af;padding:2.5rem;background:#f9fafb;border-radius:.75rem}
 
-/* PRINT META */
-.print-meta { display:none; }
+/* Summary */
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem;margin-bottom:1rem}
+@media(min-width:640px){.summary-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.summary-grid{grid-template-columns:repeat(6,1fr)}}
+.stat-card{background:#fff;border-radius:.6rem;border:1px solid #c7d2fe;padding:.65rem}
+.stat-label{font-size:.65rem;text-transform:uppercase;font-weight:700;color:#9ca3af;margin-bottom:.25rem}
+.stat-value{font-size:1.1rem;font-weight:700;color:#1e3a8a}
+.stat-value.green{color:#059669}
+.summary-actions{display:flex;gap:.65rem;flex-wrap:wrap}
+.btn-green{padding:.5rem 1rem;border-radius:.5rem;border:none;background:#059669;color:#fff;font-size:.82rem;font-weight:600}
+.btn-green:hover{background:#047857}
+.btn-blue{padding:.5rem 1rem;border-radius:.5rem;border:none;background:#2563eb;color:#fff;font-size:.82rem;font-weight:600}
+.btn-blue:hover{background:#1d4ed8}
 
-/* ── PHONE (≤479px) ── */
-@media(max-width:479px){
-  body { padding:6px; }
-  .container { padding:12px 10px; border-radius:8px; }
-  .scroll-hint { display:block; }
-  th,td { font-size:11px; padding:6px 4px; }
-  .btn { font-size:13px; padding:10px 12px; }
-  .btn-row { flex-direction:column; }
-  .btn-row .btn { width:100%; text-align:center; }
-  .arc-item { flex-direction:column; align-items:flex-start; }
-  .arc-actions { width:100%; justify-content:flex-end; }
-}
-/* ── TABLET / iPAD (600px–899px) ── */
-@media(min-width:600px) and (max-width:899px){
-  .scroll-hint { display:block; }
-}
-/* ── DESKTOP (≥900px) ── */
-@media(min-width:900px){
-  body { padding:16px; }
-  .container { padding:28px; }
-}
+/* Archive */
+.archive-item{background:#fff;border:1px solid #e5e7eb;border-radius:.65rem;padding:.75rem 1rem;margin-bottom:.65rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.65rem}
+.archive-name{font-weight:700;color:#1e3a8a;font-size:.85rem}
+.archive-meta{font-size:.75rem;color:#6b7280;margin-top:.2rem}
+.archive-btns{display:flex;gap:.4rem;flex-shrink:0}
+.btn-reprint{padding:.35rem .65rem;border-radius:.5rem;border:none;background:#059669;color:#fff;font-size:.75rem;font-weight:500}
+.btn-reprint:hover{background:#047857}
+.btn-del-arc{padding:.35rem .65rem;border-radius:.5rem;border:none;background:#dc2626;color:#fff;font-size:.75rem;font-weight:500}
+.btn-del-arc:hover{background:#b91c1c}
 
-/* PRINT */
-@media print {
-  body { background:white; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .container { box-shadow:none; padding:10px; max-width:100%; }
-  .no-print    { display:none !important; }
-  .hide-print  { display:none !important; }
-  .scroll-hint { display:none !important; }
-  .table-wrapper { overflow:visible !important; }
-  table { min-width:0 !important; width:100% !important; font-size:10px; }
-  th,td { padding:5px 4px; white-space:normal; }
-  th { background:#2563eb !important; color:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  tr:nth-child(even) { background:#f8fafc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .summary { background:#eef2ff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .s-card { background:white !important; }
-  .archive { display:none !important; }
-  .identity-section { display:none !important; }
-  .week-section { display:none !important; }
-  .edit-banner { display:none !important; }
-  .form-section { display:none !important; }
-  .card-view  { display:none !important; }
-  .table-view { display:block !important; }
-  .print-meta { display:block; margin-bottom:14px; font-size:13px; color:#374151; border-bottom:2px solid #2563eb; padding-bottom:8px; }
-  .print-meta .pm-row { display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; }
-  .print-meta .pm-item { font-size:12px; }
-  .print-meta .pm-item span { font-weight:bold; color:#1e3a8a; }
-  @page { margin:1cm; }
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.4);align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,.15);padding:1.5rem;width:100%;max-width:22rem;margin:1rem}
+.modal-title{font-size:1.05rem;font-weight:700;color:#1e3a8a;margin-bottom:1rem}
+.modal-field{margin-bottom:.75rem}
+.modal-field label{display:block;font-size:.72rem;font-weight:700;color:#6b7280;margin-bottom:.3rem}
+.modal-actions{display:flex;gap:.65rem;margin-top:1.25rem}
+.btn-modal-cancel{flex:1;padding:.5rem;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;color:#4b5563;font-size:.85rem;font-weight:500}
+.btn-modal-cancel:hover{background:#f9fafb}
+.btn-modal-save{flex:1;padding:.5rem;border-radius:.5rem;border:none;background:#2563eb;color:#fff;font-size:.85rem;font-weight:600}
+.btn-modal-save:hover{background:#1d4ed8}
+.btn-modal-save:disabled{opacity:.6;cursor:not-allowed}
+
+/* Print */
+@media print{
+  #pin-screen{display:none!important}
+  .no-print{display:none!important}
+  #app{display:block!important;padding:0;max-width:100%}
+  .card{box-shadow:none;border:none;padding:.5rem 0}
+  body{background:#fff}
+  .print-header{display:block!important}
 }
+.print-header{display:none;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:2px solid #2563eb}
+.print-header-title{font-size:1.1rem;font-weight:700;color:#1e3a8a}
+.print-header-meta{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.3rem;font-size:.82rem;color:#374151}
 </style>
 </head>
 <body>
-<div class="container">
 
-  <h1>Ubox Solutions Load Tracker</h1>
-  <h3>Universe Carrier Inc</h3>
+<!-- ── PIN SCREEN ── -->
+<div id="pin-screen">
+  <div class="pin-card">
+    <div>
+      <div class="pin-logo-title">Ubox Solutions</div>
+      <div class="pin-logo-sub">Universe Carrier Inc</div>
+    </div>
+    <div class="pin-lock-icon">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+    </div>
+    <div class="pin-label">Enter your PIN</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-keypad">
+      <button class="pin-key num" data-d="1">1</button>
+      <button class="pin-key num" data-d="2">2</button>
+      <button class="pin-key num" data-d="3">3</button>
+      <button class="pin-key num" data-d="4">4</button>
+      <button class="pin-key num" data-d="5">5</button>
+      <button class="pin-key num" data-d="6">6</button>
+      <button class="pin-key num" data-d="7">7</button>
+      <button class="pin-key num" data-d="8">8</button>
+      <button class="pin-key num" data-d="9">9</button>
+      <div class="pin-key empty"></div>
+      <button class="pin-key num" data-d="0">0</button>
+      <button class="pin-key back" id="pin-back">⌫</button>
+    </div>
+    <div class="pin-hint">Default PIN is <strong>1234</strong>. Change it inside the app.</div>
+  </div>
+</div>
 
-  <!-- PRINT META (only shows when printing) -->
-  <div class="print-meta" id="printMeta"></div>
+<!-- ── MAIN APP ── -->
+<div id="app">
 
-  <!-- IDENTITY — permanent, never cleared -->
-  <div class="identity-section no-print">
+  <!-- Print header (hidden on screen) -->
+  <div class="print-header" id="print-header">
+    <div class="print-header-title">Ubox Solutions Load Tracker — Universe Carrier Inc</div>
+    <div class="print-header-meta" id="print-meta"></div>
+  </div>
+
+  <div class="card no-print">
+    <!-- App Header -->
+    <div class="header">
+      <div>
+        <div class="header-title">Ubox Solutions Load Tracker</div>
+        <div class="header-sub">Universe Carrier Inc</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon no-print" id="btn-open-pin-modal" title="Change PIN">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </button>
+        <button class="btn-lock no-print" id="btn-lock">Lock</button>
+      </div>
+    </div>
+
+    <!-- Your Info -->
     <div class="section-label">Your Info (saved permanently)</div>
-    <div class="identity-grid">
-      <div class="identity-box">
-        <label>Driver Name</label>
-        <input type="text" id="driverName" placeholder="e.g. John Doe">
+    <div class="grid-3" style="margin-bottom:1.25rem">
+      <div class="field-card green">
+        <div class="field-label">Driver Name</div>
+        <input type="text" id="driver-name" placeholder="e.g. John Doe"/>
       </div>
-      <div class="identity-box">
-        <label>Truck #</label>
-        <input type="text" id="truckNumber" placeholder="e.g. T-1042">
+      <div class="field-card green">
+        <div class="field-label">Truck #</div>
+        <input type="text" id="truck-number" placeholder="e.g. T-1042"/>
       </div>
-      <div class="identity-box">
-        <label>Trailer #</label>
-        <input type="text" id="trailerNumber" placeholder="e.g. TR-5509">
+      <div class="field-card green">
+        <div class="field-label">Trailer #</div>
+        <input type="text" id="trailer-number" placeholder="e.g. TR-5509"/>
       </div>
     </div>
-  </div>
 
-  <!-- WEEK DATES -->
-  <div class="week-section no-print">
+    <!-- Week Range -->
     <div class="section-label">Week Range (resets every Tuesday)</div>
-    <div class="week-grid">
-      <div class="week-box">
-        <label>Week Start (Monday)</label>
-        <input type="date" id="weekStart">
+    <div class="grid-2">
+      <div class="field-card blue">
+        <div class="field-label">Week Start (Monday)</div>
+        <input type="date" id="week-start"/>
       </div>
-      <div class="week-box">
-        <label>Week End (Sunday)</label>
-        <input type="date" id="weekEnd">
+      <div class="field-card blue">
+        <div class="field-label">Week End (Sunday)</div>
+        <input type="date" id="week-end"/>
       </div>
     </div>
   </div>
 
-  <!-- EDIT BANNER -->
-  <div id="editBanner" class="edit-banner no-print" style="display:none;">
-    <span id="editBannerText"></span>
-    <button class="btn btn-cancel btn-sm" onclick="cancelEdit()">Cancel</button>
-  </div>
-
-  <!-- FORM -->
-  <div class="form-section no-print">
+  <!-- Load Form Card -->
+  <div class="card no-print">
+    <div class="edit-banner" id="edit-banner">
+      <span id="edit-banner-text">Editing load — update fields and press "Update Load"</span>
+      <button class="btn-cancel-edit" id="btn-cancel-edit">Cancel</button>
+    </div>
     <div class="form-grid">
-      <div class="form-group">
+      <div class="form-field">
         <label>Load Number *</label>
-        <input type="text" id="loadNumber" placeholder="e.g. 123456">
+        <input type="text" id="f-load-num" placeholder="e.g. 123456"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>REF or DRY</label>
-        <input type="text" id="refordry" placeholder="REF or DRY">
+        <input type="text" id="f-refordry" placeholder="REF or DRY"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Pickup City *</label>
-        <input type="text" id="pickup" placeholder="e.g. Chicago, IL">
+        <input type="text" id="f-pickup" placeholder="e.g. Chicago, IL"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Delivery City *</label>
-        <input type="text" id="delivery" placeholder="e.g. Dallas, TX">
+        <input type="text" id="f-delivery" placeholder="e.g. Dallas, TX"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Miles</label>
-        <input type="number" id="miles" placeholder="e.g. 450" min="0">
+        <input type="number" id="f-miles" placeholder="e.g. 450" min="0"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Detention Hours</label>
-        <input type="number" id="detentionHours" placeholder="e.g. 2" min="0" step="0.5">
+        <input type="number" id="f-det" placeholder="e.g. 2" min="0" step="0.5"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Pickup Date *</label>
-        <input type="date" id="pickupDate">
+        <input type="date" id="f-pu-date"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Pickup Time</label>
-        <input type="time" id="pickupTime">
+        <input type="time" id="f-pu-time"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Delivery Date *</label>
-        <input type="date" id="deliveryDate">
+        <input type="date" id="f-del-date"/>
       </div>
-      <div class="form-group">
+      <div class="form-field">
         <label>Delivery Time</label>
-        <input type="time" id="deliveryTime">
+        <input type="time" id="f-del-time"/>
       </div>
-      <div class="form-group" style="display:flex;align-items:flex-end;">
-        <button id="addBtn" class="btn" style="width:100%;" onclick="addLoad()">Add Load</button>
+      <div class="form-field" style="display:flex;align-items:flex-end">
+        <button class="btn-add" id="btn-submit">Add Load</button>
       </div>
     </div>
   </div>
 
-  <!-- TABLE VIEW (desktop only) -->
-  <div class="table-view">
-    <div class="scroll-hint">← Swipe table left / right →</div>
-    <div class="table-wrapper">
-      <table>
+  <!-- Loads Table (desktop) -->
+  <div class="card" style="padding:1rem">
+    <div class="table-wrap">
+      <table id="loads-table">
         <thead>
           <tr>
-            <th>#</th><th>Load #</th><th>REF/DRY</th>
-            <th>Pickup</th><th>Pickup Date</th><th>Pickup Time</th>
-            <th>Delivery</th><th>Delivery Date</th><th>Delivery Time</th>
-            <th>Miles</th>
-            <th class="hide-print">Miles Pay</th>
-            <th>Detention Hrs</th>
-            <th class="hide-print">Detention Pay</th>
-            <th class="hide-print">Total Pay</th>
-            <th class="no-print">Edit</th>
-            <th class="no-print">Delete</th>
+            <th>#</th><th>Load #</th><th>REF/DRY</th><th>Pickup</th>
+            <th>Pickup Date</th><th>Pickup Time</th><th>Delivery</th>
+            <th>Delivery Date</th><th>Delivery Time</th><th>Miles</th>
+            <th class="no-print">Miles Pay</th><th>Det Hrs</th>
+            <th class="no-print">Det Pay</th><th class="no-print">Total Pay</th>
+            <th class="no-print">Edit</th><th class="no-print">Delete</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody id="loads-tbody"></tbody>
       </table>
     </div>
+    <!-- Mobile cards -->
+    <div class="mobile-cards" id="mobile-cards"></div>
   </div>
 
-  <!-- CARD VIEW (phone + iPad only) -->
-  <div class="card-view" id="cardView"></div>
-
-  <!-- SUMMARY -->
-  <div class="summary">
-    <h2>Weekly Summary</h2>
+  <!-- Summary Card -->
+  <div class="card">
+    <div style="font-size:1.05rem;font-weight:700;color:#1e3a8a;margin-bottom:1rem">Weekly Summary</div>
     <div class="summary-grid">
-      <div class="s-card"><div class="lbl">Total Loads</div><div class="val" id="sTotalLoads">0</div></div>
-      <div class="s-card"><div class="lbl">Total Miles</div><div class="val" id="sTotalMiles">0</div></div>
-      <div class="s-card hide-print"><div class="lbl">Miles Pay (@$0.75/mi)</div><div class="val" id="sMilesPay">$0.00</div></div>
-      <div class="s-card"><div class="lbl">Total Detention Hrs</div><div class="val" id="sTotalDet">0</div></div>
-      <div class="s-card hide-print"><div class="lbl">Detention Pay (@$15/hr)</div><div class="val" id="sDetPay">$0.00</div></div>
-      <div class="s-card hide-print"><div class="lbl">Total Earnings</div><div class="val green" id="sTotal">$0.00</div></div>
+      <div class="stat-card"><div class="stat-label">Total Loads</div><div class="stat-value" id="s-loads">0</div></div>
+      <div class="stat-card"><div class="stat-label">Total Miles</div><div class="stat-value" id="s-miles">0</div></div>
+      <div class="stat-card no-print"><div class="stat-label">Miles Pay (@$0.75/mi)</div><div class="stat-value" id="s-miles-pay">$0.00</div></div>
+      <div class="stat-card"><div class="stat-label">Total Det Hrs</div><div class="stat-value" id="s-det">0</div></div>
+      <div class="stat-card no-print"><div class="stat-label">Det Pay (@$15/hr)</div><div class="stat-value" id="s-det-pay">$0.00</div></div>
+      <div class="stat-card no-print"><div class="stat-label">Total Earnings</div><div class="stat-value green" id="s-total">$0.00</div></div>
     </div>
-    <div class="btn-row no-print">
-      <button class="btn btn-green" onclick="saveWeeklyPDF()">Save &amp; Print Weekly PDF</button>
-      <button class="btn" onclick="window.print()">Print Current View</button>
+    <div class="summary-actions no-print">
+      <button class="btn-green" id="btn-save-archive">Save &amp; Print Weekly PDF</button>
+      <button class="btn-blue" id="btn-print">Print Current View</button>
     </div>
   </div>
 
-  <!-- ARCHIVE -->
-  <div class="archive no-print">
-    <h2>Saved Weekly PDFs</h2>
-    <div id="archiveList"></div>
+  <!-- Archive Card -->
+  <div class="card no-print">
+    <div style="font-size:1.05rem;font-weight:700;color:#1e3a8a;margin-bottom:1rem">Saved Weekly PDFs</div>
+    <div id="archive-list"><p style="font-size:.85rem;color:#6b7280">No saved PDFs yet. Click "Save &amp; Print Weekly PDF" to save this week.</p></div>
   </div>
 
+</div><!-- /#app -->
+
+<!-- Change PIN Modal -->
+<div class="modal-bg" id="pin-modal">
+  <div class="modal">
+    <div class="modal-title">Change PIN</div>
+    <div class="modal-field">
+      <label>Current PIN</label>
+      <input type="password" inputmode="numeric" maxlength="4" id="m-cur-pin" placeholder="••••"/>
+    </div>
+    <div class="modal-field">
+      <label>New PIN (4 digits)</label>
+      <input type="password" inputmode="numeric" maxlength="4" id="m-new-pin" placeholder="••••"/>
+    </div>
+    <div class="modal-field">
+      <label>Confirm New PIN</label>
+      <input type="password" inputmode="numeric" maxlength="4" id="m-conf-pin" placeholder="••••"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" id="btn-pin-cancel">Cancel</button>
+      <button class="btn-modal-save" id="btn-pin-save">Save PIN</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const RATE = 0.75, DET = 15;
-let loads = [], editIndex = -1;
-try { loads = JSON.parse(localStorage.getItem("loads") || "[]"); } catch(e) { loads = []; }
+(function(){
+'use strict';
 
-/* ---- IDENTITY FIELDS — permanent, saved on every keystroke ---- */
-const ID_KEYS = ["driverName","truckNumber","trailerNumber"];
-ID_KEYS.forEach(function(id){
-  const el = document.getElementById(id);
-  // Load saved value
-  el.value = localStorage.getItem(id) || "";
-  // Save on every keystroke and change
-  function persist(){ localStorage.setItem(id, el.value); }
-  el.addEventListener("input",  persist);
-  el.addEventListener("change", persist);
-});
+const RATE = 0.75, DET_RATE = 15;
+const fmt = n => '$' + Number(n).toFixed(2);
+const toNum = v => parseFloat(v) || 0;
 
-/* ---- WEEK FIELDS — saved on change, cleared by Tuesday reset ---- */
-const WEEK_KEYS = ["weekStart","weekEnd"];
-WEEK_KEYS.forEach(function(id){
-  const el = document.getElementById(id);
-  el.value = localStorage.getItem(id) || "";
-  el.addEventListener("change", function(){ localStorage.setItem(id, el.value); });
-});
+/* ── STORAGE ── */
+const S = {
+  get: k => { try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+};
 
-/* ---- INIT ---- */
-checkWeeklyReset();
-renderTable();
-renderArchive();
+/* ── PIN ── */
+let pinBuf = '';
+const pinDotsEl = document.getElementById('pin-dots');
+const pinErrEl  = document.getElementById('pin-error');
 
-/* ---- WEEKLY RESET ---- */
-function checkWeeklyReset(){
-  const lastReset = localStorage.getItem("lastResetDate");
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-  if(today.getDay() === 2 && lastReset !== todayStr){
-    const ok = confirm(
-      "It's Tuesday — weekly reset time.\n\n" +
-      "Your loads and week dates will be cleared.\n" +
-      "Driver Name, Truck #, and Trailer # stay as-is.\n" +
-      "Your saved weekly PDFs in the archive are NOT affected.\n\n" +
-      "Continue?"
-    );
-    if(ok){
-      loads = [];
-      localStorage.setItem("loads", JSON.stringify(loads));
-      WEEK_KEYS.forEach(function(id){
-        localStorage.removeItem(id);
-        document.getElementById(id).value = "";
-      });
-      localStorage.setItem("lastResetDate", todayStr);
-      renderTable();
-    }
+function getPin(){ return S.get('ubox_pin') || '1234'; }
+function setPin(p){ S.set('ubox_pin', p); }
+
+function updateDots(){
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('d'+i);
+    d.classList.toggle('filled', i < pinBuf.length);
   }
 }
 
-/* ---- ADD / UPDATE LOAD ---- */
-function addLoad(){
-  const loadNumber   = g("loadNumber");
-  const refordry     = g("refordry");
-  const pickup       = g("pickup");
-  const pickupDate   = g("pickupDate");
-  const pickupTime   = g("pickupTime");
-  const delivery     = g("delivery");
-  const deliveryDate = g("deliveryDate");
-  const deliveryTime = g("deliveryTime");
-  const miles        = parseFloat(g("miles")) || 0;
-  const detention    = parseFloat(g("detentionHours")) || 0;
+function pinDigit(d){
+  if(pinBuf.length >= 4) return;
+  pinBuf += d;
+  pinErrEl.textContent = '';
+  updateDots();
+  if(pinBuf.length === 4) checkPin();
+}
+
+function pinBack(){
+  pinBuf = pinBuf.slice(0,-1);
+  updateDots();
+}
+
+function checkPin(){
+  if(pinBuf === getPin()){
+    sessionStorage.setItem('ubox_unlocked','1');
+    document.getElementById('pin-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    init();
+  } else {
+    pinDotsEl.classList.add('shake');
+    pinErrEl.textContent = 'Incorrect PIN. Try again.';
+    pinBuf = '';
+    updateDots();
+    setTimeout(()=>pinDotsEl.classList.remove('shake'), 500);
+  }
+}
+
+document.querySelectorAll('.pin-key.num').forEach(b=>{
+  b.addEventListener('click',()=>pinDigit(b.dataset.d));
+});
+document.getElementById('pin-back').addEventListener('click', pinBack);
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('pin-screen').style.display === 'none') return;
+  if(e.key>='0' && e.key<='9') pinDigit(e.key);
+  if(e.key==='Backspace') pinBack();
+});
+
+// Auto-unlock if already unlocked this session
+if(sessionStorage.getItem('ubox_unlocked')==='1'){
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  init();
+}
+
+/* ── APP ── */
+function init(){
+  loadProfile();
+  loadWeek();
+  render();
+  checkTuesdayReset();
+
+  // Profile auto-save on blur
+  ['driver-name','truck-number','trailer-number'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.addEventListener('change', saveProfile);
+    el.addEventListener('blur', saveProfile);
+  });
+
+  // Week dates auto-save
+  document.getElementById('week-start').addEventListener('change', saveWeek);
+  document.getElementById('week-end').addEventListener('change', saveWeek);
+
+  // Form submit
+  document.getElementById('btn-submit').addEventListener('click', handleSubmit);
+
+  // Cancel edit
+  document.getElementById('btn-cancel-edit').addEventListener('click', cancelEdit);
+
+  // Summary buttons
+  document.getElementById('btn-save-archive').addEventListener('click', saveArchive);
+  document.getElementById('btn-print').addEventListener('click', ()=>window.print());
+
+  // Lock
+  document.getElementById('btn-lock').addEventListener('click', ()=>{
+    sessionStorage.removeItem('ubox_unlocked');
+    location.reload();
+  });
+
+  // PIN modal
+  document.getElementById('btn-open-pin-modal').addEventListener('click', ()=>{
+    document.getElementById('pin-modal').classList.add('open');
+    document.getElementById('m-cur-pin').value='';
+    document.getElementById('m-new-pin').value='';
+    document.getElementById('m-conf-pin').value='';
+  });
+  document.getElementById('btn-pin-cancel').addEventListener('click', ()=>{
+    document.getElementById('pin-modal').classList.remove('open');
+  });
+  document.getElementById('pin-modal').addEventListener('click', e=>{
+    if(e.target === document.getElementById('pin-modal'))
+      document.getElementById('pin-modal').classList.remove('open');
+  });
+  document.getElementById('btn-pin-save').addEventListener('click', handleChangePin);
+}
+
+/* ── PROFILE ── */
+function loadProfile(){
+  const p = S.get('ubox_profile') || {};
+  document.getElementById('driver-name').value  = p.driverName  || '';
+  document.getElementById('truck-number').value = p.truckNumber || '';
+  document.getElementById('trailer-number').value = p.trailerNumber || '';
+}
+function saveProfile(){
+  S.set('ubox_profile',{
+    driverName:  document.getElementById('driver-name').value,
+    truckNumber: document.getElementById('truck-number').value,
+    trailerNumber: document.getElementById('trailer-number').value,
+  });
+}
+
+/* ── WEEK ── */
+function loadWeek(){
+  const w = S.get('ubox_week') || {};
+  document.getElementById('week-start').value = w.weekStart || '';
+  document.getElementById('week-end').value   = w.weekEnd   || '';
+}
+function saveWeek(){
+  const cur = S.get('ubox_week') || {};
+  S.set('ubox_week',{
+    ...cur,
+    weekStart: document.getElementById('week-start').value,
+    weekEnd:   document.getElementById('week-end').value,
+  });
+}
+function checkTuesdayReset(){
+  const today = new Date();
+  if(today.getDay() !== 2) return;
+  const todayStr = today.toISOString().split('T')[0];
+  const w = S.get('ubox_week') || {};
+  if(w.lastResetDate === todayStr) return;
+  const ok = confirm(
+    "It's Tuesday — weekly reset time.\n\n"+
+    "Your loads and week dates will be cleared.\n"+
+    "Driver Name, Truck #, and Trailer # stay as-is.\n"+
+    "Your saved weekly archives are NOT affected.\n\n"+
+    "Continue?"
+  );
+  if(ok){
+    S.set('ubox_loads',[]);
+    S.set('ubox_week',{ lastResetDate: todayStr });
+    loadWeek();
+    render();
+    alert('Week reset successfully.');
+  }
+}
+
+/* ── LOADS ── */
+function getLoads(){ return S.get('ubox_loads') || []; }
+function saveLoads(loads){ S.set('ubox_loads', loads); }
+
+let editingIdx = null;
+
+function handleSubmit(){
+  const loadNumber = document.getElementById('f-load-num').value.trim();
+  const refordry   = document.getElementById('f-refordry').value.trim();
+  const pickup     = document.getElementById('f-pickup').value.trim();
+  const delivery   = document.getElementById('f-delivery').value.trim();
+  const pickupDate = document.getElementById('f-pu-date').value;
+  const pickupTime = document.getElementById('f-pu-time').value;
+  const deliveryDate = document.getElementById('f-del-date').value;
+  const deliveryTime = document.getElementById('f-del-time').value;
+  const miles      = toNum(document.getElementById('f-miles').value);
+  const detHours   = toNum(document.getElementById('f-det').value);
 
   if(!loadNumber || !pickup || !delivery || !pickupDate || !deliveryDate){
-    alert("Please fill all required fields:\nLoad #, Pickup City, Pickup Date, Delivery City, Delivery Date.");
+    alert('Please fill in: Load Number, Pickup City, Pickup Date, Delivery City, Delivery Date.');
     return;
   }
 
-  const milesPay = miles * RATE, detPay = detention * DET;
-  const load = { loadNumber, refordry, pickup, pickupDate, pickupTime,
-                 delivery, deliveryDate, deliveryTime,
-                 miles, detentionHours: detention, milesPay, detentionPay: detPay, total: milesPay + detPay };
+  const milesPay = miles * RATE;
+  const detPay   = detHours * DET_RATE;
+  const total    = milesPay + detPay;
 
-  if(editIndex === -1){ loads.push(load); }
-  else { loads[editIndex] = load; cancelEdit(); }
+  const load = { loadNumber, refordry, pickup, pickupDate, pickupTime, delivery, deliveryDate, deliveryTime, miles, detHours, milesPay, detPay, total };
 
-  saveLoads(); clearForm(); renderTable();
+  const loads = getLoads();
+  if(editingIdx !== null){
+    loads[editingIdx] = load;
+    cancelEdit();
+  } else {
+    loads.push(load);
+    clearForm();
+  }
+  saveLoads(loads);
+  render();
 }
 
-/* ---- EDIT / DELETE ---- */
-function editLoad(i){
-  const l = loads[i];
-  s("loadNumber",    l.loadNumber);    s("refordry",      l.refordry);
-  s("pickup",        l.pickup);        s("pickupDate",    l.pickupDate);
-  s("pickupTime",    l.pickupTime);    s("delivery",      l.delivery);
-  s("deliveryDate",  l.deliveryDate);  s("deliveryTime",  l.deliveryTime);
-  s("miles",         l.miles);         s("detentionHours",l.detentionHours);
-  editIndex = i;
-  document.getElementById("addBtn").textContent = "Update Load";
-  document.getElementById("editBanner").style.display = "flex";
-  document.getElementById("editBannerText").textContent = "Editing load #"+(i+1)+" — update fields and press \"Update Load\"";
-  window.scrollTo({ top:0, behavior:"smooth" });
+function clearForm(){
+  ['f-load-num','f-refordry','f-pickup','f-delivery','f-pu-date','f-pu-time','f-del-date','f-del-time','f-miles','f-det']
+    .forEach(id => document.getElementById(id).value = '');
 }
 
-function deleteLoad(i){
-  if(!confirm("Delete this load? This cannot be undone.")) return;
-  loads.splice(i,1); saveLoads(); renderTable();
+function startEdit(idx){
+  const l = getLoads()[idx];
+  if(!l) return;
+  editingIdx = idx;
+  document.getElementById('f-load-num').value   = l.loadNumber;
+  document.getElementById('f-refordry').value   = l.refordry;
+  document.getElementById('f-pickup').value     = l.pickup;
+  document.getElementById('f-delivery').value   = l.delivery;
+  document.getElementById('f-pu-date').value    = l.pickupDate;
+  document.getElementById('f-pu-time').value    = l.pickupTime || '';
+  document.getElementById('f-del-date').value   = l.deliveryDate;
+  document.getElementById('f-del-time').value   = l.deliveryTime || '';
+  document.getElementById('f-miles').value      = l.miles;
+  document.getElementById('f-det').value        = l.detHours;
+  document.getElementById('btn-submit').textContent = 'Update Load';
+  document.getElementById('edit-banner').classList.add('visible');
+  document.getElementById('edit-banner-text').textContent = `Editing load #${idx+1} — update fields and press "Update Load"`;
+  document.querySelector('.card').scrollIntoView({behavior:'smooth'});
 }
 
 function cancelEdit(){
-  editIndex = -1;
-  document.getElementById("addBtn").textContent = "Add Load";
-  document.getElementById("editBanner").style.display = "none";
+  editingIdx = null;
   clearForm();
+  document.getElementById('btn-submit').textContent = 'Add Load';
+  document.getElementById('edit-banner').classList.remove('visible');
 }
 
-/* ---- RENDER TABLE (desktop) ---- */
-function renderTable(displayLoads){
-  displayLoads = displayLoads || loads;
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
-  let miles=0, det=0, mPay=0, dPay=0, total=0;
+function deleteLoad(idx){
+  if(!confirm('Delete this load? This cannot be undone.')) return;
+  const loads = getLoads();
+  loads.splice(idx,1);
+  saveLoads(loads);
+  if(editingIdx === idx) cancelEdit();
+  render();
+}
 
-  if(displayLoads.length === 0){
-    const tr = tbody.insertRow(), td = tr.insertCell();
-    td.colSpan = 16; td.style.cssText = "color:#9ca3af;padding:24px;text-align:center;";
-    td.textContent = "No loads yet — fill in the form above to add your first load.";
+/* ── RENDER ── */
+function render(){
+  const loads = getLoads();
+
+  // Desktop table
+  const tbody = document.getElementById('loads-tbody');
+  tbody.innerHTML = '';
+  if(loads.length === 0){
+    tbody.innerHTML = '<tr><td colspan="16" style="color:#9ca3af;padding:2rem">No loads yet — fill in the form above to add your first load.</td></tr>';
   } else {
-    displayLoads.forEach(function(l, i){
-      miles += l.miles; det += l.detentionHours;
-      mPay += l.milesPay; dPay += l.detentionPay; total += l.total;
-      const tr = tbody.insertRow();
-      function cell(text, cls){ const td = tr.insertCell(); td.textContent = text; if(cls) td.className = cls; }
-      cell(i+1); cell(l.loadNumber); cell(l.refordry||"—");
-      cell(l.pickup); cell(l.pickupDate); cell(l.pickupTime||"—");
-      cell(l.delivery); cell(l.deliveryDate); cell(l.deliveryTime||"—");
-      cell(l.miles);
-      cell("$"+l.milesPay.toFixed(2),     "pay-green hide-print");
-      cell(l.detentionHours+" hr");
-      cell("$"+l.detentionPay.toFixed(2), "pay-amber hide-print");
-      cell("$"+l.total.toFixed(2),        "pay-blue hide-print");
-
-      if(!displayLoads._readonly){
-        const eTd = tr.insertCell(); eTd.className = "no-print";
-        const eBtn = document.createElement("button");
-        eBtn.textContent="Edit"; eBtn.className="btn btn-amber btn-sm";
-        eBtn.onclick=(function(idx){ return function(){ editLoad(idx); }; })(i);
-        eTd.appendChild(eBtn);
-
-        const dTd = tr.insertCell(); dTd.className = "no-print";
-        const dBtn = document.createElement("button");
-        dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
-        dBtn.onclick=(function(idx){ return function(){ deleteLoad(idx); }; })(i);
-        dTd.appendChild(dBtn);
-      } else {
-        const e = tr.insertCell(); e.className = "no-print";
-        const d = tr.insertCell(); d.className = "no-print";
-      }
+    loads.forEach((l,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td><strong>${esc(l.loadNumber)}</strong></td>
+        <td>${esc(l.refordry)||'—'}</td>
+        <td>${esc(l.pickup)}</td>
+        <td style="white-space:nowrap">${l.pickupDate}</td>
+        <td>${l.pickupTime||'—'}</td>
+        <td>${esc(l.delivery)}</td>
+        <td style="white-space:nowrap">${l.deliveryDate}</td>
+        <td>${l.deliveryTime||'—'}</td>
+        <td>${l.miles}</td>
+        <td class="green no-print">${fmt(l.milesPay)}</td>
+        <td>${l.detHours} hr</td>
+        <td class="amber no-print">${fmt(l.detPay)}</td>
+        <td class="navy no-print">${fmt(l.total)}</td>
+        <td class="no-print"><button class="btn-edit-row" onclick="window._editLoad(${i})">Edit</button></td>
+        <td class="no-print"><button class="btn-del-row" onclick="window._delLoad(${i})">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
     });
   }
 
-  document.getElementById("sTotalLoads").textContent = displayLoads.length;
-  document.getElementById("sTotalMiles").textContent  = miles.toLocaleString();
-  document.getElementById("sMilesPay").textContent    = "$"+mPay.toFixed(2);
-  document.getElementById("sTotalDet").textContent    = det;
-  document.getElementById("sDetPay").textContent      = "$"+dPay.toFixed(2);
-  document.getElementById("sTotal").textContent       = "$"+total.toFixed(2);
-
-  renderCards(displayLoads);
-}
-
-/* ---- RENDER CARDS (mobile / iPad) ---- */
-function renderCards(displayLoads){
-  const container = document.getElementById("cardView");
-  container.innerHTML = "";
-
-  if(displayLoads.length === 0){
-    const el = document.createElement("div");
-    el.className = "card-empty";
-    el.textContent = "No loads yet — fill in the form above to add your first load.";
-    container.appendChild(el);
-    return;
+  // Mobile cards
+  const mc = document.getElementById('mobile-cards');
+  mc.innerHTML = '';
+  if(loads.length === 0){
+    mc.innerHTML = '<div class="empty-msg">No loads yet — fill in the form above to add your first load.</div>';
+  } else {
+    loads.forEach((l,i)=>{
+      const div = document.createElement('div');
+      div.className = 'load-card';
+      div.innerHTML = `
+        <div class="load-card-header">
+          <div class="load-num-badge">${i+1}</div>
+          <div class="load-card-title">Load ${esc(l.loadNumber)}</div>
+          ${l.refordry ? `<span class="badge-type">${esc(l.refordry)}</span>` : ''}
+        </div>
+        <div class="route-grid">
+          <div>
+            <div class="route-label">Pickup</div>
+            <div class="route-city">${esc(l.pickup)}</div>
+            <div class="route-date">${l.pickupDate}${l.pickupTime?' @ '+l.pickupTime:''}</div>
+          </div>
+          <div class="route-arrow">→</div>
+          <div>
+            <div class="route-label">Delivery</div>
+            <div class="route-city">${esc(l.delivery)}</div>
+            <div class="route-date">${l.deliveryDate}${l.deliveryTime?' @ '+l.deliveryTime:''}</div>
+          </div>
+        </div>
+        <div class="pay-row">
+          <span class="green">Miles Pay: ${fmt(l.milesPay)}</span>
+          <span class="amber">Det Pay: ${fmt(l.detPay)}</span>
+          <span class="navy">Total: ${fmt(l.total)}</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-card-edit" onclick="window._editLoad(${i})">Edit</button>
+          <button class="btn-card-del" onclick="window._delLoad(${i})">Delete</button>
+        </div>
+      `;
+      mc.appendChild(div);
+    });
   }
 
-  displayLoads.forEach(function(l, i){
-    const card = document.createElement("div");
-    card.className = "load-card";
+  // Summary
+  const totalLoads = loads.length;
+  const totalMiles = loads.reduce((s,l)=>s+l.miles,0);
+  const milesPay   = loads.reduce((s,l)=>s+l.milesPay,0);
+  const totalDet   = loads.reduce((s,l)=>s+l.detHours,0);
+  const detPay     = loads.reduce((s,l)=>s+l.detPay,0);
+  const totalPay   = loads.reduce((s,l)=>s+l.total,0);
+  document.getElementById('s-loads').textContent    = totalLoads;
+  document.getElementById('s-miles').textContent    = totalMiles.toLocaleString();
+  document.getElementById('s-miles-pay').textContent = fmt(milesPay);
+  document.getElementById('s-det').textContent      = totalDet;
+  document.getElementById('s-det-pay').textContent  = fmt(detPay);
+  document.getElementById('s-total').textContent    = fmt(totalPay);
 
-    // Header
-    card.innerHTML =
-      '<div class="card-head">' +
-        '<div class="card-num">'+(i+1)+'</div>' +
-        '<div class="card-load-num">Load '+l.loadNumber+'</div>' +
-        (l.refordry ? '<div class="card-badge">'+l.refordry+'</div>' : '') +
-      '</div>' +
-      // Legs
-      '<div class="card-legs">' +
-        '<div>' +
-          '<div class="card-leg-lbl">Pickup</div>' +
-          '<div class="card-leg-city">'+l.pickup+'</div>' +
-          '<div class="card-leg-dt">'+l.pickupDate+(l.pickupTime?' @ '+l.pickupTime:'')+'</div>' +
-        '</div>' +
-        '<div class="card-arrow">→</div>' +
-        '<div>' +
-          '<div class="card-leg-lbl">Delivery</div>' +
-          '<div class="card-leg-city">'+l.delivery+'</div>' +
-          '<div class="card-leg-dt">'+l.deliveryDate+(l.deliveryTime?' @ '+l.deliveryTime:'')+'</div>' +
-        '</div>' +
-      '</div>' +
-      // Stats
-      '<div class="card-stats">' +
-        '<div><div class="card-stat-lbl">Miles</div><div class="card-stat-val">'+l.miles+'</div></div>' +
-        '<div><div class="card-stat-lbl">Detention</div><div class="card-stat-val">'+l.detentionHours+' hr</div></div>' +
-      '</div>' +
-      // Pay (screen only)
-      '<div class="card-pay hide-print">' +
-        '<span class="pay-green">Miles: $'+l.milesPay.toFixed(2)+'</span>' +
-        '<span class="pay-amber">Det: $'+l.detentionPay.toFixed(2)+'</span>' +
-        '<span class="pay-blue">Total: $'+l.total.toFixed(2)+'</span>' +
-      '</div>';
-
-    // Actions (not for readonly / reprint)
-    if(!displayLoads._readonly){
-      const actions = document.createElement("div");
-      actions.className = "card-actions no-print";
-
-      const eBtn = document.createElement("button");
-      eBtn.textContent="Edit"; eBtn.className="btn btn-amber btn-sm";
-      eBtn.onclick=(function(idx){ return function(){ editLoad(idx); }; })(i);
-
-      const dBtn = document.createElement("button");
-      dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
-      dBtn.onclick=(function(idx){ return function(){ deleteLoad(idx); }; })(i);
-
-      actions.appendChild(eBtn);
-      actions.appendChild(dBtn);
-      card.appendChild(actions);
-    }
-
-    container.appendChild(card);
-  });
+  // Archive list
+  renderArchives();
 }
 
-/* ---- PRINT META ---- */
-function updatePrintMeta(ws, we){
-  const dn = localStorage.getItem("driverName")    || "";
-  const tn = localStorage.getItem("truckNumber")   || "";
-  const tr = localStorage.getItem("trailerNumber") || "";
-  const parts = [];
-  if(dn) parts.push('<div class="pm-item">Driver: <span>'+dn+'</span></div>');
-  if(tn) parts.push('<div class="pm-item">Truck #: <span>'+tn+'</span></div>');
-  if(tr) parts.push('<div class="pm-item">Trailer #: <span>'+tr+'</span></div>');
-  const weekStr = (ws||"") + (ws && we ? " → " : "") + (we||"");
-  if(weekStr) parts.push('<div class="pm-item">Week: <span>'+weekStr+'</span></div>');
-  document.getElementById("printMeta").innerHTML =
-    '<div class="pm-row">'+parts.join("")+'</div>';
-}
+/* ── ARCHIVES ── */
+function getArchives(){ return S.get('ubox_archives') || []; }
+function saveArchives(a){ S.set('ubox_archives', a); }
 
-/* ---- SAVE & PRINT ---- */
-function saveWeeklyPDF(){
-  const ws = localStorage.getItem("weekStart") || "";
-  const we = localStorage.getItem("weekEnd")   || "";
-  if(!ws || !we){ alert("Please set week start and end dates."); return; }
-  if(loads.length === 0){ alert("No loads to save."); return; }
+function saveArchive(){
+  const loads = getLoads();
+  if(loads.length === 0){ alert('No loads to archive.'); return; }
+  const w = S.get('ubox_week') || {};
+  if(!w.weekStart || !w.weekEnd){ alert('Please set week start and end dates before archiving.'); return; }
+  const p = S.get('ubox_profile') || {};
 
-  let miles=0, det=0, total=0;
-  loads.forEach(function(l){ miles+=l.miles; det+=l.detentionHours; total+=l.total; });
+  const totalMiles  = loads.reduce((s,l)=>s+l.miles,0);
+  const totalDet    = loads.reduce((s,l)=>s+l.detHours,0);
+  const totalPay    = loads.reduce((s,l)=>s+l.total,0);
 
-  const entry = {
-    name:          "Week "+ws+" to "+we,
-    savedDate:     new Date().toLocaleString(),
-    weekStart:     ws, weekEnd: we,
-    driverName:    localStorage.getItem("driverName")    || "",
-    truckNumber:   localStorage.getItem("truckNumber")   || "",
-    trailerNumber: localStorage.getItem("trailerNumber") || "",
-    loads:         JSON.parse(JSON.stringify(loads)),
-    totalMiles:    miles, totalDetentionHours: det, totalPay: total
+  const arc = {
+    id: Date.now(),
+    name: `Week ${w.weekStart} to ${w.weekEnd}`,
+    weekStart: w.weekStart,
+    weekEnd: w.weekEnd,
+    driverName:   p.driverName   || '',
+    truckNumber:  p.truckNumber  || '',
+    trailerNumber:p.trailerNumber|| '',
+    totalLoads: loads.length,
+    totalMiles,
+    totalDet,
+    totalPay,
+    loadsData: JSON.parse(JSON.stringify(loads)),
+    savedAt: new Date().toISOString(),
   };
 
-  const arc = getArchive(); arc.push(entry);
-  localStorage.setItem("pdfArchive", JSON.stringify(arc));
-  renderArchive();
-  updatePrintMeta(ws, we);
-  setTimeout(function(){ window.print(); }, 150);
+  const archives = getArchives();
+  archives.unshift(arc);
+  saveArchives(archives);
+  renderArchives();
+
+  // Print current view
+  setTimeout(()=>window.print(), 150);
 }
 
-/* ---- ARCHIVE ---- */
-function getArchive(){ try { return JSON.parse(localStorage.getItem("pdfArchive")||"[]"); } catch(e){ return []; } }
-
-function renderArchive(){
-  const container = document.getElementById("archiveList");
-  const arc = getArchive();
-  container.innerHTML = "";
-  if(arc.length === 0){
-    const p = document.createElement("p");
-    p.style.cssText = "color:#6b7280;margin-top:8px;font-size:14px;";
-    p.textContent = "No saved PDFs yet. Click \"Save & Print Weekly PDF\" to save this week.";
-    container.appendChild(p); return;
-  }
-  arc.forEach(function(item, i){
-    const div = document.createElement("div"); div.className = "arc-item";
-    const info = document.createElement("div"); info.className = "arc-info";
-    const strong = document.createElement("strong"); strong.textContent = item.name;
-    const span = document.createElement("span");
-    const parts = [];
-    if(item.driverName)    parts.push(item.driverName);
-    if(item.truckNumber)   parts.push("Truck "+item.truckNumber);
-    if(item.trailerNumber) parts.push("Trailer "+item.trailerNumber);
-    parts.push(item.loads.length+" loads");
-    parts.push("Saved "+item.savedDate);
-    span.textContent = parts.join(" · ");
-    info.appendChild(strong); info.appendChild(span);
-
-    const actions = document.createElement("div"); actions.className = "arc-actions";
-
-    const rBtn = document.createElement("button");
-    rBtn.textContent="Reprint"; rBtn.className="btn btn-green btn-sm";
-    rBtn.onclick=(function(entry){ return function(){ reprintEntry(entry); }; })(item);
-
-    const dBtn = document.createElement("button");
-    dBtn.textContent="Delete"; dBtn.className="btn btn-red btn-sm";
-    dBtn.onclick=(function(idx){ return function(){
-      if(!confirm("Delete this saved week from the archive?")) return;
-      const a=getArchive(); a.splice(idx,1);
-      localStorage.setItem("pdfArchive",JSON.stringify(a)); renderArchive();
-    }; })(i);
-
-    actions.appendChild(rBtn); actions.appendChild(dBtn);
-    div.appendChild(info); div.appendChild(actions);
-    container.appendChild(div);
-  });
+function deleteArchive(id){
+  if(!confirm('Delete this saved week from the archive?')) return;
+  saveArchives(getArchives().filter(a=>a.id!==id));
+  renderArchives();
 }
 
-/* ---- REPRINT — identity fields NEVER touched ---- */
-function reprintEntry(entry){
-  // Update print meta with archive entry's week dates (identity always shows current user info)
-  updatePrintMeta(entry.weekStart, entry.weekEnd);
-  // Mark as readonly so Edit/Delete buttons don't show for archive loads
-  const arcLoads = entry.loads.slice();
-  arcLoads._readonly = true;
-  renderTable(arcLoads);
-  setTimeout(function(){
+let reprintData = null;
+
+function reprint(id){
+  const arc = getArchives().find(a=>a.id===id);
+  if(!arc) return;
+  reprintData = arc;
+  updatePrintHeader(arc);
+  setTimeout(()=>{
     window.print();
-    // Restore live view
-    updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
-    renderTable();
-  }, 150);
+    reprintData = null;
+    updatePrintHeader(null);
+  }, 200);
 }
 
-/* ---- HELPERS ---- */
-function g(id){ return document.getElementById(id).value.trim(); }
-function s(id, val){ document.getElementById(id).value = val; }
-function saveLoads(){ localStorage.setItem("loads", JSON.stringify(loads)); }
-function clearForm(){
-  ["loadNumber","refordry","pickup","pickupDate","pickupTime",
-   "delivery","deliveryDate","deliveryTime","miles","detentionHours"]
-  .forEach(function(id){ document.getElementById(id).value = ""; });
+function updatePrintHeader(arc){
+  const meta = document.getElementById('print-meta');
+  if(!arc){ meta.innerHTML=''; return; }
+  const parts = [];
+  if(arc.driverName)    parts.push(`Driver: <strong>${esc(arc.driverName)}</strong>`);
+  if(arc.truckNumber)   parts.push(`Truck #: <strong>${esc(arc.truckNumber)}</strong>`);
+  if(arc.trailerNumber) parts.push(`Trailer #: <strong>${esc(arc.trailerNumber)}</strong>`);
+  if(arc.weekStart||arc.weekEnd) parts.push(`Week: <strong>${arc.weekStart||''}${arc.weekStart&&arc.weekEnd?' to ':''}${arc.weekEnd||''}</strong>`);
+  meta.innerHTML = parts.map(p=>`<span>${p}</span>`).join('');
 }
 
-// Set initial print meta
-updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
-// Update print meta when week dates change
-["weekStart","weekEnd"].forEach(function(id){
-  document.getElementById(id).addEventListener("change", function(){
-    updatePrintMeta(localStorage.getItem("weekStart")||"", localStorage.getItem("weekEnd")||"");
-  });
+function renderArchives(){
+  const list = document.getElementById('archive-list');
+  const archives = getArchives();
+  if(archives.length === 0){
+    list.innerHTML='<p style="font-size:.85rem;color:#6b7280">No saved PDFs yet. Click "Save &amp; Print Weekly PDF" to save this week.</p>';
+    return;
+  }
+  list.innerHTML = archives.map(a=>`
+    <div class="archive-item">
+      <div>
+        <div class="archive-name">${esc(a.name)}</div>
+        <div class="archive-meta">${[a.driverName, a.truckNumber&&'Truck '+a.truckNumber, a.trailerNumber&&'Trailer '+a.trailerNumber, a.totalLoads+' loads', 'Saved '+new Date(a.savedAt).toLocaleString()].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="archive-btns">
+        <button class="btn-reprint" onclick="window._reprint(${a.id})">Reprint</button>
+        <button class="btn-del-arc" onclick="window._delArc(${a.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── CHANGE PIN ── */
+function handleChangePin(){
+  const cur  = document.getElementById('m-cur-pin').value;
+  const newP = document.getElementById('m-new-pin').value;
+  const conf = document.getElementById('m-conf-pin').value;
+  if(!/^\d{4}$/.test(newP)){ alert('New PIN must be exactly 4 digits.'); return; }
+  if(newP !== conf){ alert("New PINs don't match."); return; }
+  if(cur !== getPin()){ alert('Current PIN is incorrect.'); return; }
+  setPin(newP);
+  document.getElementById('pin-modal').classList.remove('open');
+  alert('PIN updated successfully.');
+}
+
+/* ── PRINT HEADER (live view) ── */
+window.addEventListener('beforeprint', ()=>{
+  if(reprintData) return; // already set
+  const p = S.get('ubox_profile') || {};
+  const w = S.get('ubox_week') || {};
+  updatePrintHeader({ driverName:p.driverName, truckNumber:p.truckNumber, trailerNumber:p.trailerNumber, weekStart:w.weekStart, weekEnd:w.weekEnd });
 });
-</script>
+window.addEventListener('afterprint', ()=>{
+  if(!reprintData) updatePrintHeader(null);
+});
 
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js")
-  .then(function(){ console.log("Service Worker Registered"); });
+/* ── GLOBALS ── */
+window._editLoad = startEdit;
+window._delLoad  = deleteLoad;
+window._reprint  = reprint;
+window._delArc   = deleteArchive;
+
+/* ── HELPERS ── */
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+})();
 </script>
 </body>
 </html>
+
